@@ -1,31 +1,29 @@
 package com.hust.qms.service;
 
+import com.hust.qms.config.UserDetailsImpl;
 import com.hust.qms.entity.PermissionUserRole;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @NoArgsConstructor
 public class BaseService {
-//    protected TokenStore tokenStore;
 
-//    @Autowired
-//    public BaseService(TokenStore tokenStore) {
-//        this.tokenStore = tokenStore;
-//    }
-//
     public Long getCurrentId() {
         Map<String, Object> moreInfo = this.getMoreInfo();
-        if (moreInfo != null && moreInfo.get("rfr_id") != null) {
-            return Long.valueOf(String.valueOf(moreInfo.get("rfr_id")));
+        if (moreInfo != null && moreInfo.get("current_id") != null) {
+            return Long.valueOf(String.valueOf(moreInfo.get("current_id")));
         }
 
         return null;
@@ -35,11 +33,7 @@ public class BaseService {
         Map<String, Object> moreInfo = this.getMoreInfo();
         List<String> roles = new ArrayList<String>();
         if (moreInfo != null && moreInfo.get("roles") != null) {
-
-            ArrayList<PermissionUserRole> permissionUserRoles = (ArrayList<PermissionUserRole>) moreInfo.get("roles");
-            for (PermissionUserRole p : permissionUserRoles) {
-                roles.add(p.getRoleCode());
-            }
+            roles.addAll((List<String>) moreInfo.get("roles"));
         }
 
         return roles;
@@ -58,15 +52,21 @@ public class BaseService {
         if (authentication == null) {
             return null;
         }
-
-        if (!(authentication.getDetails() instanceof OAuth2AuthenticationDetails)) {
-            return null;
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String currentUserName = authentication.getName();
         }
-        OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) authentication.getDetails();
-        String tokenValue = details.getTokenValue();
-        OAuth2AccessToken token = tokenStore.readAccessToken(tokenValue);
-        Map<String, Object> moreInfo = token.getAdditionalInformation();
-        moreInfo.put("access_token", token.getValue());
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+       Map<String, Object> moreInfo = new HashMap<>();
+       moreInfo.put("current_id", userDetails.getId());
+       moreInfo.put("current_username", userDetails.getUsername());
+       moreInfo.put("roles", roles);
+       moreInfo.put("access_toke", null);
         return moreInfo;
     }
 

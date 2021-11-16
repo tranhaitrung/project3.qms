@@ -143,7 +143,7 @@ public class AuthenService {
         return SUCCESS_RESPONSE("Đăng ký tài khoản thành công!", success);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("@userService.authorizeRole('ADMIN,MANAGER')")
     public ServiceResponse createMemberAccount(UserDTO input) {
 
         PermissionRole permissionRole = permissionRoleRepository.findByCode(input.getRoleCode());
@@ -186,7 +186,9 @@ public class AuthenService {
                 .build();
         generateVerifyCode(userDTO);
 
-        sendCode(userDTO);
+        String content = "Bạn đã được tạo tài khoản thành công với vai trò "+ input.getRoleCode() +" \nTài khoản đăng nhập: \n - username: "+input.getUsername()+"\n - password: "+input.getPassword();
+
+        emailService.sendSimpleMessage(userDTO.getEmail(), "Tạo thành khoản thành công", content);
 
         return SUCCESS_RESPONSE("Tạo tài khoản nhân viên thành công!", success);
     }
