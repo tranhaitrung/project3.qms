@@ -24,6 +24,7 @@ public class ResetSerialNumber {
     @Scheduled(cron = "0 0 * * * *") //00:00 load lại dữ liệu
     protected void resetDataSerialNumber() {
         orderNumberRepository.deleteAll();
+        log.info("reset table order number");
 
         List<Counter> counterList = counterRepository.findAll();
 
@@ -41,6 +42,7 @@ public class ResetSerialNumber {
             counter.setWaitingCustomerIds(null);
             counter.setServiceName(null);
             counter.setServiceId(null);
+            counter.setFullNameCustomer(null);
 
             counterRepository.save(counter);
         }

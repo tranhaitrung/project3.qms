@@ -5,7 +5,7 @@ import com.hust.qms.entity.Counter;
 import com.hust.qms.entity.OrderNumber;
 import com.hust.qms.entity.ServiceQMS;
 import com.hust.qms.entity.User;
-import com.hust.qms.entity.UserService;
+import com.hust.qms.entity.UserServiceQMS;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.repository.*;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +32,7 @@ public class TakeNumberService {
     private OrderNumberRepository orderNumberRepository;
 
     @Autowired
-    private UserServiceRepository userServiceRepository;
+    private UserServiceQMSRepository userServiceQMSRepository;
 
     @Autowired
     private ServiceQMSRepository serviceQMSRepository;
@@ -52,7 +52,8 @@ public class TakeNumberService {
         }
 
         OrderNumber orderNumber = orderNumberRepository.getLastOrderNumber();
-        long no = orderNumber.getNumber()+1;
+
+        long no = orderNumber == null ? 1 : orderNumber.getNumber()+1;
 
         OrderNumber currentOrderNumber = OrderNumber.builder()
                 .number(no)
@@ -98,7 +99,7 @@ public class TakeNumberService {
 
         waitingIds = waitingIds == null ? oderNumberStr : waitingIds +","+ oderNumberStr;
 
-        UserService userService = UserService.builder()
+        UserServiceQMS userServiceQMS = UserServiceQMS.builder()
                 .counterId(counter.getId())
                 .counterName(counter.getName())
                 .createdAt(new Timestamp(System.currentTimeMillis()))
@@ -125,14 +126,14 @@ public class TakeNumberService {
             counter.setFullNameCustomer(user.getFullName());
             counter.setServiceId(serviceQMS.getId());
             counter.setServiceName(serviceQMS.getServiceName());
-            userService.setStatus(ACTIVE);
+            userServiceQMS.setStatus(ACTIVE);
         }
         else {
             counter.setWaitingCustomerIds(waitingIds);
-            userService.setStatus(WAITING);
+            userServiceQMS.setStatus(WAITING);
         }
         counterRepository.save(counter);
-        userServiceRepository.save(userService);
+        userServiceQMSRepository.save(userServiceQMS);
 
         OrderNumberDTO orderNumberDTO = OrderNumberDTO.builder()
                 .orderNumber(oderNumberStr)

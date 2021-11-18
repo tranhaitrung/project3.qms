@@ -28,7 +28,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hust.qms.common.Const.Role.CUSTOMER;
+import static com.hust.qms.common.Const.Role.*;
 import static com.hust.qms.common.Const.Status.*;
 import static com.hust.qms.common.Const.TypeVeriy.EMAIL;
 import static com.hust.qms.exception.ServiceResponse.*;
@@ -64,6 +64,12 @@ public class AuthenService {
 
     @Autowired
     private BaseService baseService;
+
+    @Autowired
+    private CheckRolesService checkRolesService;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     public Object login(UserDTO input) {
 
@@ -138,6 +144,16 @@ public class AuthenService {
                 .build();
         generateVerifyCode(userDTO);
 
+        Customer customer = Customer.builder()
+                .username(success.getUsername())
+                .userId(success.getId())
+                .email(success.getEmail())
+                .status(INACTIVE)
+                .createdAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+
+        customerRepository.save(customer);
+
         sendCode(userDTO);
 
         return SUCCESS_RESPONSE("Đăng ký tài khoản thành công!", success);
@@ -147,6 +163,15 @@ public class AuthenService {
     public ServiceResponse createMemberAccount(UserDTO input) {
 
         PermissionRole permissionRole = permissionRoleRepository.findByCode(input.getRoleCode());
+
+        if (permissionRole == null) return BAD_RESPONSE("Mã phân quyền không hợp lệ!");
+
+        if (ADMIN.equals(input.getRoleCode())) return FORBIDDEN_RESPONSE("Bạn có có quyền tạo vai trò ADMIN");
+
+        if (MANAGER.equals(input.getRoleCode())) {
+            if (!checkRolesService.authorizeRole("ADMIN"))
+                return FORBIDDEN_RESPONSE("Bạn không có quyền tạo vai trò MANAGER");
+        }
 
         if (userRepository.existsByUsername(input.getUsername())) {
             return BAD_RESPONSE("Error: Username is already taken!");
@@ -271,6 +296,11 @@ public class AuthenService {
         user.setStatus(ACTIVE);
         user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         userRepository.save(user);
+
+        Customer customer = customerRepository.findCustomerByUsername(input.getUsername());
+        customer.setStatus(ACTIVE);
+        customer.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        customerRepository.save(customer);
 
         verifyCodeRepository.delete(verifyCodes.get(0));
 

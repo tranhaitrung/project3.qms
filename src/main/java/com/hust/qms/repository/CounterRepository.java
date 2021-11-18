@@ -11,4 +11,6 @@ public interface CounterRepository extends JpaRepository<Counter, Integer> {
     List<Counter> findAllByStatus(String status);
 
     Counter findCounterById(Integer id);
+
+    Counter findCounterByIdAndStatus(Integer id, String status);
 }

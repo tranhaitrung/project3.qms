@@ -1,10 +1,17 @@
 package com.hust.qms.dto;
 
+import com.hust.qms.entity.UserServiceQMS;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CounterDTO {
     private Integer counterId;
 
@@ -20,6 +27,10 @@ public class CounterDTO {
 
     private String fullNameCustomer;
 
+    private Long serviceId;
+
+    private String serviceName;
+
     private Long memberId;
 
     private String firstNameMember;
@@ -32,7 +43,11 @@ public class CounterDTO {
 
     private String waitingCustomerIds;
 
-    private Long serviceId;
+    private String missedCustomerIds;
 
-    private String serviceName;
+    private List<UserServiceQMS> waitingCustomerList;
+
+    private List<UserServiceQMS> missedCustomerList;
+
+
 }

@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 @Data
 @Entity
 @Table(name = "user_services")
-public class UserService {
+public class UserServiceQMS {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

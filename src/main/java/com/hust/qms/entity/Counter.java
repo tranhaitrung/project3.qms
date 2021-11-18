@@ -42,6 +42,8 @@ public class Counter {
 
     private String waitingCustomerIds;
 
+    private String missedCustomerIds;
+
     private Long serviceId;
 
     private String serviceName;
