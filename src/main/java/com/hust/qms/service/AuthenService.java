@@ -4,20 +4,16 @@ import com.hust.qms.config.JwtUtils;
 import com.hust.qms.config.UserDetailsImpl;
 import com.hust.qms.dto.UserDTO;
 import com.hust.qms.dto.VerifyDTO;
-import com.hust.qms.entity.PermissionRole;
-import com.hust.qms.entity.PermissionUserRole;
-import com.hust.qms.entity.User;
-import com.hust.qms.entity.VerifyCode;
+import com.hust.qms.entity.*;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.mail.EmailService;
-import com.hust.qms.repository.PermissionRoleRepository;
-import com.hust.qms.repository.PermissionUserRoleRepository;
-import com.hust.qms.repository.UserRepository;
-import com.hust.qms.repository.VerifyCodeRepository;
+import com.hust.qms.repository.*;
 import com.hust.qms.response.JwtResponse;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,8 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.hust.qms.common.Const.Role.CUSTOMER;
-import static com.hust.qms.common.Const.Status.ACTIVE;
-import static com.hust.qms.common.Const.Status.INACTIVE;
+import static com.hust.qms.common.Const.Status.*;
 import static com.hust.qms.common.Const.TypeVeriy.EMAIL;
 import static com.hust.qms.exception.ServiceResponse.*;
 
@@ -58,12 +53,17 @@ public class AuthenService {
 
     @Autowired
     private PermissionRoleRepository permissionRoleRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     PasswordEncoder encoder;
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    private BaseService baseService;
 
     public Object login(UserDTO input) {
 
@@ -143,7 +143,7 @@ public class AuthenService {
         return SUCCESS_RESPONSE("Đăng ký tài khoản thành công!", success);
     }
 
-    @PreAuthorize("@userService.authorizeRole('ADMIN,MANAGER')")
+    @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,MANAGER')")
     public ServiceResponse createMemberAccount(UserDTO input) {
 
         PermissionRole permissionRole = permissionRoleRepository.findByCode(input.getRoleCode());
@@ -156,11 +156,27 @@ public class AuthenService {
             return BAD_RESPONSE("Error: Email is already taken!");
         }
 
+        String fullName = null;
+        if (!StringUtils.isBlank(input.getFirstName()) && !StringUtils.isBlank(input.getLastName())) {
+            fullName = String.format("%s %s", input.getFirstName(), input.getLastName());
+        }
+
         User user = User.builder()
                 .username(input.getUsername())
                 .password(encoder.encode(input.getPassword()))
                 .email(input.getUsername())
                 .status(ACTIVE)
+                .address(input.getAddress())
+                .city(input.getCity())
+                .district(input.getDistrict())
+                .displayName(fullName)
+                .firstName(input.getFirstName())
+                .lastName(input.getLastName())
+                .fullName(fullName)
+                .phone(input.getPhone())
+                .countryCode(input.getCountryCode())
+                .country(input.getCountry())
+                .birthday(input.getBirthday())
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
 
@@ -185,6 +201,27 @@ public class AuthenService {
                 .phone(success.getPhone())
                 .build();
         generateVerifyCode(userDTO);
+
+        Member member = Member.builder()
+                .userId(success.getId())
+                .username(success.getUsername())
+                .address(success.getAddress())
+                .city(input.getCity())
+                .status(ACTIVE)
+                .district(input.getDistrict())
+                .displayName(fullName)
+                .email(success.getEmail())
+                .firstName(input.getFirstName())
+                .lastName(input.getLastName())
+                .fullName(fullName)
+                .phone(input.getPhone())
+                .countryCode(input.getCountryCode())
+                .country(input.getCountry())
+                .birthday(input.getBirthday())
+                .createdAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+
+        memberRepository.save(member);
 
         String content = "Bạn đã được tạo tài khoản thành công với vai trò "+ input.getRoleCode() +" \nTài khoản đăng nhập: \n - username: "+input.getUsername()+"\n - password: "+input.getPassword();
 
@@ -238,5 +275,19 @@ public class AuthenService {
         verifyCodeRepository.delete(verifyCodes.get(0));
 
         return SUCCESS_RESPONSE("Xác thực tài khoản thành công", user);
+    }
+
+    @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,MANAGER,EMPLOYEE')")
+    public ServiceResponse blockUser(UserDTO userDTO) {
+
+        User user = userRepository.findByUsername(userDTO.getUsername()).orElse(null);
+        if (user != null) {
+            user.setStatus(BLOCK);
+            user.setUpdatedBy(baseService.getCurrentId());
+            user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            userRepository.save(user);
+            return SUCCESS_RESPONSE("block customer successfull",null);
+        }
+        return BAD_RESPONSE("Block customer fail!");
     }
 }

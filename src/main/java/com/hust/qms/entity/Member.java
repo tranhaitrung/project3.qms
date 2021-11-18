@@ -1,25 +1,27 @@
-package com.hust.qms.dto;
+package com.hust.qms.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.*;
 import java.sql.Timestamp;
 
-@Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+@Data
+@Builder
+@Entity
+@Table(name = "members")
+public class Member {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     private Long userId;
 
     private String username;
-
-    private String password;
 
     private String status;
 
@@ -28,8 +30,6 @@ public class UserDTO {
     private String lastName;
 
     private String fullName;
-
-    private String roleCode;
 
     private String countryCode;
 
@@ -55,10 +55,5 @@ public class UserDTO {
 
     private Long updatedBy;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Timestamp birthday;
-
-    private Integer verify_phone;
-
-    private Integer verify_email;
 }

@@ -11,7 +11,7 @@ import java.util.List;
 public interface VerifyCodeRepository extends JpaRepository<VerifyCode, Long> {
     List<VerifyCode> findAllByUserIdAndStatus(Long userId, String status);
 
-    List<VerifyCode> findAllByUserIdAndStatusAndType(Long userId, String status, String type);
+    List<VerifyCode> findAllByStatus(String status);
 
     List<VerifyCode> findAllByUsernameAndStatusAndType(String username, String status, String type);
 

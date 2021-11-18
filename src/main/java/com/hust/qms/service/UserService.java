@@ -1,44 +1,51 @@
 package com.hust.qms.service;
 
+import com.hust.qms.dto.UserDTO;
+import com.hust.qms.entity.User;
+import com.hust.qms.exception.ServiceResponse;
+import com.hust.qms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import static com.hust.qms.common.Const.Status.ACTIVE;
+import static com.hust.qms.exception.ServiceResponse.FORBIDDEN_RESPONSE;
+import static com.hust.qms.exception.ServiceResponse.SUCCESS_RESPONSE;
 
 @Service
 public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Autowired
     private BaseService baseService;
 
-    private boolean isMatchRole(List<String> currentRole, String allowRole) {
-        String[] roleArr = allowRole.split(",");
-        if (currentRole != null && !currentRole.isEmpty()) {
-            for (String r : currentRole) {
-                for (int i = 0; i < roleArr.length; i++) {
-                    if (r.equals(roleArr[i])) return true;
-                }
+    @Autowired
+    private CheckRolesService checkRolesService;
+
+    public ServiceResponse updateInfoUser(UserDTO userDTO) {
+        Long userId;
+        if (userDTO.getUserId() != null) {
+            if (checkRolesService.authorizeRole("ADMIN,MANAGER,EMPLOYEE")) {
+                userId = userDTO.getUserId();
+            }else {
+                return FORBIDDEN_RESPONSE("Bạn không đủ quyền để thực hiện chức năng này!");
             }
+        }else {
+            userId = baseService.getCurrentId();
         }
-        return false;
+
+        User user = userRepository.findByIdAndStatus(userId, ACTIVE);
+
+        user.setAddress(userDTO.getAddress());
+        user.setAvatar(userDTO.getAvatar());
+        user.setBirthday(userDTO.getBirthday());
+        user.setCity(userDTO.getCity());
+        user.setCountry(userDTO.getCountry());
+        user.setCountryCode(userDTO.getCountryCode());
+        user.setDisplayName(userDTO.getDisplayName());
+
+        return SUCCESS_RESPONSE("Cập nhật thông tin thành công!", user);
     }
-
-    public boolean authorizeRole(String role) {
-        List<String> roles = baseService.getCurrentRoles();
-        if (roles.size() > 0 && isMatchRole(roles, role)) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean authorizeIdAndRole(Long userId, String roleStr) {
-        Long currId = baseService.getCurrentId();
-        List<String> roles = baseService.getCurrentRoles();
-
-        if (currId.equals(userId) || isMatchRole(roles, roleStr)) {
-            return true;
-        }
-        return false;
-    }
-
 
 }

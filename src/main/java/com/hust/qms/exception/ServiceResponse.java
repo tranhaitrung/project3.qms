@@ -43,5 +43,13 @@ public class ServiceResponse {
         return serviceResponse;
     }
 
+    public static ServiceResponse FORBIDDEN_RESPONSE(String message) {
+        ServiceResponse serviceResponse = new ServiceResponse();
+        serviceResponse.setStatus("Request forbidden!");
+        serviceResponse.setStatusCode(HttpStatus.SC_FORBIDDEN);
+        serviceResponse.setMessage(message);
+        return serviceResponse;
+    }
+
 
 }
