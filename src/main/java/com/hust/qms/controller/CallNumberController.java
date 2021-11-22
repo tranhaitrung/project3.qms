@@ -21,4 +21,9 @@ public class CallNumberController {
     public ResponseEntity nextNumber(@RequestParam("counterId") Integer counterId) {
         return ResponseEntity.ok(callNumberService.nextCustomer(counterId));
     }
+
+    @GetMapping("/make-miss-number")
+    public ResponseEntity missNumber(@RequestParam("counterId")Integer counterId) {
+        return ResponseEntity.ok(callNumberService.missCustomer(counterId));
+    }
 }

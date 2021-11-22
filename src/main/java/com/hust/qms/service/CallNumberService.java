@@ -1,8 +1,8 @@
 package com.hust.qms.service;
 
 import com.hust.qms.dto.CounterDTO;
+
 import com.hust.qms.entity.Counter;
-import com.hust.qms.entity.Customer;
 import com.hust.qms.entity.Member;
 import com.hust.qms.entity.UserServiceQMS;
 import com.hust.qms.exception.ServiceResponse;
@@ -166,9 +166,103 @@ public class CallNumberService {
         return SUCCESS_RESPONSE("SỐ TIẾP THEO LÀ "+counter.getOrderNumber(),counterDTO);
     }
 
-    @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,EMPOYEE,MANAGER')")
-    public ServiceResponse missCustomer() {
-        return null;
+    @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,EMPLOYEE,MANAGER')")
+    public ServiceResponse missCustomer(Integer counterId) {
+        Counter counter = counterRepository.findCounterByIdAndStatus(counterId, ACTIVE);
+        String missedNumbers = counter.getMissedCustomerIds();
+        String waitingNumbers = counter.getWaitingCustomerIds();
+
+        UserServiceQMS userServiceQMS = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(counter.getOrderNumber(), ACTIVE, counterId);
+
+        userServiceQMS.setStatus(MISSED);
+        userServiceQMS.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        userServiceQMSRepository.save(userServiceQMS);
+
+        List<UserServiceQMS> missedCustomerList = new ArrayList<>();
+        List<UserServiceQMS> waitingCustomerList = new ArrayList<>();
+
+        CounterDTO counterDTO = new CounterDTO();
+
+        if (StringUtils.isBlank(missedNumbers)) {
+            missedNumbers = counter.getOrderNumber();
+        }else {
+            missedNumbers = missedNumbers +","+ counter.getOrderNumber();
+        }
+
+        counter.setMissedCustomerIds(missedNumbers);
+
+        List<String> missedNumberList = Arrays.asList(missedNumbers.split(","));
+
+        for (String number : missedNumberList) {
+            UserServiceQMS missedCustomer = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(number,MISSED,counterId);
+            missedCustomerList.add(missedCustomer);
+        }
+
+        //Kiểm tra xem có hàng đợi không
+        if (StringUtils.isBlank(counter.getWaitingCustomerIds())) {
+            counter.setCustomerId(null);
+            counter.setFirstNameCustomer(null);
+            counter.setLastNameCustomer(null);
+            counter.setFullNameCustomer(null);
+            counter.setServiceId(null);
+            counter.setServiceName(null);
+            counter.setOrderNumber(null);
+            counterRepository.save(counter);
+        } else {
+            List<String> listNumberWaiting = Arrays.asList(waitingNumbers.split(","));
+            String nextNumber = listNumberWaiting.get(0);
+            UserServiceQMS userNext = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(nextNumber, WAITING, counterId);
+
+            userNext.setStatus(ACTIVE);
+            userNext.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            userServiceQMSRepository.save(userServiceQMS);
+
+            if (listNumberWaiting.size() == 1) counter.setWaitingCustomerIds(null);
+            else counter.setWaitingCustomerIds(waitingNumbers.substring(7));
+
+            counter.setCustomerId(userNext.getCustomerId());
+            counter.setFirstNameCustomer(userNext.getFirstNameCustomer());
+            counter.setLastNameCustomer(userNext.getLastNameCustomer());
+            counter.setFullNameCustomer(userNext.getFullNameCustomer());
+            counter.setServiceId(userNext.getServiceId());
+            counter.setServiceName(userNext.getServiceName());
+            counter.setOrderNumber(nextNumber);
+
+            for (int i=1; i< listNumberWaiting.size(); i++) {
+                UserServiceQMS userWaiting = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(listNumberWaiting.get(i), WAITING, counterId);
+                //Customer customer = customerRepository.findCustomerByUsername(userServiceQMS.getUsername());
+                waitingCustomerList.add(userWaiting);
+            }
+        }
+
+        counterDTO.setFullNameMember(counter.getFullNameMember());
+        counterDTO.setFirstNameMember(counter.getFirstNameMember());
+        counterDTO.setLastNameMember(counter.getLastNameMember());
+        counterDTO.setMemberId(counter.getMemberId());
+
+        counterDTO.setLastNameCustomer(counter.getLastNameCustomer());
+        counterDTO.setFirstNameCustomer(counter.getFirstNameCustomer());
+        counterDTO.setFullNameCustomer(counter.getFullNameCustomer());
+
+        counterDTO.setWaitingCustomerList(waitingCustomerList);
+        counterDTO.setMissedCustomerList(missedCustomerList);
+
+        counterDTO.setCustomerId(counter.getCustomerId());
+
+        counterDTO.setServiceId(counter.getServiceId());
+        counterDTO.setServiceName(counter.getServiceName());
+
+        counterDTO.setCounterId(counterId);
+        counterDTO.setCounterName(counter.getName());
+        counterDTO.setOrderNumber(counter.getOrderNumber());
+        counterDTO.setStatus(counter.getStatus());
+
+        counterRepository.save(counter);
+
+
+        String message = StringUtils.isBlank(counter.getOrderNumber()) ? "Đã hết khách hàng đợi!" : "Khách hàng tiếp theo là: " +counter.getOrderNumber();
+
+        return SUCCESS_RESPONSE(message, counterDTO);
     }
 
     @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,EMPOYEE,MANAGER')")

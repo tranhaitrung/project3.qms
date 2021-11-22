@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import static com.hust.qms.common.Const.Status.ACTIVE;
+import static com.hust.qms.common.Const.StatusUserService.RESERVE;
 import static com.hust.qms.common.Const.StatusUserService.WAITING;
 import static com.hust.qms.exception.ServiceResponse.BAD_RESPONSE;
 import static com.hust.qms.exception.ServiceResponse.SUCCESS_RESPONSE;
@@ -66,6 +67,25 @@ public class TakeNumberService {
         orderNumberRepository.save(currentOrderNumber);
 
         List<Counter>  counterList = counterRepository.findAllByStatus(ACTIVE);
+
+        if (counterList.size() == 0) {
+            UserServiceQMS userServiceQMS = UserServiceQMS.builder()
+                    .firstNameCustomer(user.getFirstName())
+                    .lastNameCustomer(user.getLastName())
+                    .fullNameCustomer(user.getFullName())
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .serviceCode(serviceCode)
+                    .serviceId(serviceQMS.getId())
+                    .serviceName(serviceQMS.getServiceName())
+                    .username(user.getUsername())
+                    .customerId(user.getId())
+                    .status(RESERVE)
+                    .number(String.format("%06d", no))
+                    .build();
+
+            userServiceQMSRepository.save(userServiceQMS);
+            return SUCCESS_RESPONSE("Số thứ tự của bạn là : " + String.format("%06d", no), userServiceQMS);
+        }
 
         int index = 0; //Chỉ số counter có ít hàng đợi nhất
 

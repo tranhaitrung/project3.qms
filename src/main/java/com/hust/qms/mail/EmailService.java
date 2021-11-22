@@ -1,9 +1,6 @@
 package com.hust.qms.mail;
 
-import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 
-import java.io.IOException;
-import java.util.Map;
 
 public interface EmailService {
     void sendSimpleMessage(String to,

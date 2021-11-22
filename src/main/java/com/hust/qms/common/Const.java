@@ -33,6 +33,7 @@ public class Const {
     }
 
     public class StatusUserService {
+        static final public String RESERVE = "RESERVE"; //Đặt số khi chưa có quầy hoạt động
         static final public String ACTIVE = "ACTIVE"; // Đang xử lý tại quầy
         static final public String MISSED = "MISSED"; //Đã đăt nhỡ
         static final public String WAITING = "WAITING"; //Đang đợi gọi tại quầy
