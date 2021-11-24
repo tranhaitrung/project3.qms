@@ -114,10 +114,15 @@ public class AuthenService {
             return BAD_RESPONSE("Error: Email is already taken!");
         }
 
+        String fullname = String.format("%s %s", input.getFirstName(), input.getLastName());
+
         User user = User.builder()
                 .username(input.getUsername())
                 .password(encoder.encode(input.getPassword()))
                 .email(input.getUsername())
+                .firstName(input.getFirstName())
+                .lastName(input.getLastName())
+                .fullName(fullname)
                 .status(INACTIVE)
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
@@ -141,6 +146,10 @@ public class AuthenService {
                 .username(success.getUsername())
                 .email(success.getEmail())
                 .phone(success.getPhone())
+                .firstName(success.getFirstName())
+                .lastName(success.getLastName())
+                .fullName(success.getFullName())
+                .createdAt(success.getCreatedAt())
                 .build();
         generateVerifyCode(userDTO);
 
@@ -156,7 +165,7 @@ public class AuthenService {
 
         sendCode(userDTO);
 
-        return SUCCESS_RESPONSE("Đăng ký tài khoản thành công!", success);
+        return SUCCESS_RESPONSE("Đăng ký tài khoản thành công!", userDTO);
     }
 
     @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,MANAGER')")

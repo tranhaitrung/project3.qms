@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,4 +17,10 @@ public interface UserServiceQMSRepository extends JpaRepository<UserServiceQMS, 
 
     @Query(value = "SELECT * FROM user_services where status = :status order by created_at asc ", nativeQuery = true)
     List<UserServiceQMS> findUserServiceQMSByStatus(@Param("status") String status);
+
+    @Query(value = "UPDATE user_services SET service_name = :serviceName, service_code = :code WHERE service_id = :id", nativeQuery = true)
+    @Transactional
+    Integer updateServiceQms(@Param("serviceName") String serviceName, @Param("code") String code, @Param("id") Long id);
+
+
 }

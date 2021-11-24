@@ -29,6 +29,10 @@ public class ServiceQMS {
 
     private Long price;
 
+    private Long createdBy;
+
+    private Long updatedBy;
+
     private Timestamp createdAt;
 
     private Timestamp updatedAt;
