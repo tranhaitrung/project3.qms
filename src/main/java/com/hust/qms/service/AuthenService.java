@@ -74,7 +74,7 @@ public class AuthenService {
     public Object login(UserDTO input) {
 
         User user = userRepository.findByUsername(input.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + input.getUsername()));
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + input.getUsername()));
 
         if (INACTIVE.equals(user.getStatus())) {
             return BAD_RESPONSE("Vui lòng kích hoạt tài khoản bằng mã 6 chữ số!");
@@ -307,7 +307,7 @@ public class AuthenService {
         User user = userRepository.findByUsername(input.getUsername())
                 .orElse(null);
 
-        if (user == null) return BAD_RESPONSE("User Not Found with username: " + input.getUsername());
+        if (user == null) return BAD_RESPONSE("Không tìm thấy tài khoản: " + input.getUsername());
 
         List<VerifyCode> verifyCodes = verifyCodeRepository.findAllByUsernameAndStatusAndTypeAndVerifyCode(input.getUsername(), ACTIVE, EMAIL, input.getVerifyCode());
 

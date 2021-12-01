@@ -3,8 +3,10 @@ package com.hust.qms.controller;
 import com.hust.qms.dto.UserDTO;
 import com.hust.qms.dto.VerifyDTO;
 import com.hust.qms.entity.User;
+import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.service.AuthenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +44,7 @@ public class AuthenController {
 
     @PostMapping("/active-account")
     public ResponseEntity<?> activeAccountCustomer(@RequestBody VerifyDTO verifyDTO) {
-        return ResponseEntity.ok(authenService.activeAccount(verifyDTO));
+        ServiceResponse response = authenService.activeAccount(verifyDTO);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 }
