@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin(value = "*", maxAge = 3600)
 public class CallNumberController {
     @Autowired
     private CallNumberService callNumberService;

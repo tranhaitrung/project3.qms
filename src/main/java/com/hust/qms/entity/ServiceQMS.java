@@ -29,6 +29,8 @@ public class ServiceQMS {
 
     private Long price;
 
+    private String image;
+
     private Long createdBy;
 
     private Long updatedBy;
