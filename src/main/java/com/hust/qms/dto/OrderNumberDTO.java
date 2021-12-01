@@ -8,6 +8,10 @@ import java.sql.Timestamp;
 @Data
 @Builder
 public class OrderNumberDTO {
+    private String serviceCode;
+
+    private String serviceName;
+
     private String fullNameCustomer;
 
     private String fullNameMember;

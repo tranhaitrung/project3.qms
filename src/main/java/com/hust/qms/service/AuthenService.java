@@ -96,6 +96,8 @@ public class AuthenService {
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
+                user.getDisplayName(),
+                user.getAvatar(),
                 roles);
 
         return jwtResponse;
@@ -123,7 +125,9 @@ public class AuthenService {
                 .firstName(input.getFirstName())
                 .lastName(input.getLastName())
                 .fullName(fullname)
+                .displayName(fullname)
                 .status(INACTIVE)
+                .avatar("https://res.cloudinary.com/litchitech/image/upload/v1638332250/PROJECT3/avatardefault_odgzm2.jpg")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
 
@@ -146,9 +150,11 @@ public class AuthenService {
                 .username(success.getUsername())
                 .email(success.getEmail())
                 .phone(success.getPhone())
+                .status(success.getStatus())
                 .firstName(success.getFirstName())
                 .lastName(success.getLastName())
                 .fullName(success.getFullName())
+                .displayName(success.getFullName())
                 .createdAt(success.getCreatedAt())
                 .build();
         generateVerifyCode(userDTO);
@@ -158,6 +164,11 @@ public class AuthenService {
                 .userId(success.getId())
                 .email(success.getEmail())
                 .status(INACTIVE)
+                .firstName(success.getFirstName())
+                .lastName(success.getLastName())
+                .fullName(success.getFullName())
+                .displayName(success.getDisplayName())
+                .avatar("https://res.cloudinary.com/litchitech/image/upload/v1638332250/PROJECT3/avatardefault_odgzm2.jpg")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
 
@@ -211,6 +222,7 @@ public class AuthenService {
                 .countryCode(input.getCountryCode())
                 .country(input.getCountry())
                 .birthday(input.getBirthday())
+                .avatar("https://res.cloudinary.com/litchitech/image/upload/v1638332250/PROJECT3/avatardefault_odgzm2.jpg")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
 
@@ -252,6 +264,7 @@ public class AuthenService {
                 .countryCode(input.getCountryCode())
                 .country(input.getCountry())
                 .birthday(input.getBirthday())
+                .avatar("https://res.cloudinary.com/litchitech/image/upload/v1638332250/PROJECT3/avatardefault_odgzm2.jpg")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
 

@@ -156,6 +156,8 @@ public class TakeNumberService {
         userServiceQMSRepository.save(userServiceQMS);
 
         OrderNumberDTO orderNumberDTO = OrderNumberDTO.builder()
+                .serviceCode(userServiceQMS.getServiceCode())
+                .serviceName(userServiceQMS.getServiceName())
                 .orderNumber(oderNumberStr)
                 .counterId(counter.getId())
                 .counterName(counter.getName())
