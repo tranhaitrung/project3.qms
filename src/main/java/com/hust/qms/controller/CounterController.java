@@ -1,13 +1,12 @@
 package com.hust.qms.controller;
 
+import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.service.CounterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.function.EntityResponse;
 
 @RestController
@@ -19,6 +18,13 @@ public class CounterController {
 
     @GetMapping("/get-all")
     public ResponseEntity getAll(){
-        return ResponseEntity.ok(counterService.getCounterAll());
+        ServiceResponse response = counterService.getCounterAll();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity counterDetail(@RequestParam("counterId") Integer counterId) {
+        ServiceResponse response = counterService.counterDetail(counterId);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 }

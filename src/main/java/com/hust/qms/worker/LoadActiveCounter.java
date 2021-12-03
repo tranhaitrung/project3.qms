@@ -28,7 +28,7 @@ public class LoadActiveCounter {
     @Scheduled(fixedRate = 30000) // 30 giây load lại 1 lần
     protected void LoadActiveCounter() {
 
-        log.info("Chuyển người đợi vào các quầy đã active");
+        //log.info("Chuyển người đợi vào các quầy đã active");
 
         List<UserServiceQMS> serviceQMSList = userServiceQMSRepository.findUserServiceQMSByStatus(RESERVE);
 

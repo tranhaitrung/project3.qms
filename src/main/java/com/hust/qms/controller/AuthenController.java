@@ -20,16 +20,14 @@ public class AuthenController {
 
     @PostMapping("/sendCode")
     public ResponseEntity<?> sendVerifyCode(@RequestBody UserDTO userDTO) {
-        User user = User.builder().username(userDTO.getUsername())
-                .password(userDTO.getPassword())
-                .build();
-        return ResponseEntity.ok(authenService.sendCode(userDTO));
+        ServiceResponse response = authenService.sendCode(userDTO);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
     @PostMapping("/register/customer")
     public ResponseEntity<?> registerCustomer(@RequestBody UserDTO userDTO) {
-
-        return ResponseEntity.ok(authenService.resisterCustomer(userDTO));
+        ServiceResponse response = authenService.resisterCustomer(userDTO);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
     @PostMapping("/login")
@@ -39,7 +37,8 @@ public class AuthenController {
 
     @PostMapping("/create-member")
     public ResponseEntity<?> createMember(@RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(authenService.createMemberAccount(userDTO));
+        ServiceResponse response = authenService.createMemberAccount(userDTO);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
     @PostMapping("/active-account")

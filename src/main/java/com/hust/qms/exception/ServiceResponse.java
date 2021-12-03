@@ -35,6 +35,15 @@ public class ServiceResponse {
         return serviceResponse;
     }
 
+    public static ServiceResponse SUCCESS(Object data) {
+        ServiceResponse serviceResponse = new ServiceResponse();
+        serviceResponse.setStatus("SUCCESS");
+        serviceResponse.setStatusCode(HttpStatus.SC_OK);
+        serviceResponse.setMessage("Success full!");
+        serviceResponse.setData(data);
+        return serviceResponse;
+    }
+
     public static ServiceResponse BAD_RESPONSE(String message) {
         ServiceResponse serviceResponse = new ServiceResponse();
         serviceResponse.setStatus("Bad request!");

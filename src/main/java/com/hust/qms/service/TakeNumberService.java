@@ -13,13 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static com.hust.qms.common.Const.Status.ACTIVE;
-import static com.hust.qms.common.Const.StatusUserService.RESERVE;
-import static com.hust.qms.common.Const.StatusUserService.WAITING;
-import static com.hust.qms.exception.ServiceResponse.BAD_RESPONSE;
-import static com.hust.qms.exception.ServiceResponse.SUCCESS_RESPONSE;
+import static com.hust.qms.common.Const.StatusUserService.*;
+import static com.hust.qms.exception.ServiceResponse.*;
 
 @Service
 public class TakeNumberService {
@@ -52,6 +54,14 @@ public class TakeNumberService {
             return BAD_RESPONSE("Dịch vụ không tồn lại, vui lòng điền mã khác!");
         }
 
+        Long userId = baseService.getCurrentId();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String today = simpleDateFormat.format(new Timestamp(System.currentTimeMillis()));
+        List<UserServiceQMS> userServiceQMSList = userServiceQMSRepository.getUserServiceQMSByCustomerIdAndNotStatus(userId, today, DONE);
+
+        if (userServiceQMSList.size() > 0 ) {
+            return BAD_RESPONSE("Số của bạn đang được xử lý!");
+        }
         OrderNumber orderNumber = orderNumberRepository.getLastOrderNumber();
 
         long no = orderNumber == null ? 1 : orderNumber.getNumber()+1;
@@ -166,6 +176,14 @@ public class TakeNumberService {
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
 
-        return SUCCESS_RESPONSE("Bạn đã lấy số thành công!", orderNumberDTO);
+        return SUCCESS_RESPONSE("Số thứ tự của bạn là : " + String.format("%06d", no), orderNumberDTO);
+    }
+
+    public ServiceResponse myNumber () {
+        Long userId = baseService.getCurrentId();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String today = simpleDateFormat.format(new Timestamp(System.currentTimeMillis()));
+        List<UserServiceQMS> userServiceQMS = userServiceQMSRepository.getUserServiceQMSByCustomerId(userId, today);
+        return SUCCESS(userServiceQMS.get(0));
     }
 }

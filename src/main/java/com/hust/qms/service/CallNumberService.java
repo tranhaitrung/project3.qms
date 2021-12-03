@@ -44,8 +44,8 @@ public class CallNumberService {
     private OrderNumberRepository orderNumberRepository;
 
     @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,EMPLOYEE,MANAGER')")
-    public ServiceResponse activeCounter(CounterDTO counterDTO) {
-        Counter counter = counterRepository.findCounterById(counterDTO.getCounterId());
+    public ServiceResponse activeCounter(Integer counterId) {
+        Counter counter = counterRepository.findCounterById(counterId);
         if (counter == null) return BAD_RESPONSE("Mã quầy không đúng!");
 
         Member member = memberRepository.findMemberByUserId(baseService.getCurrentId());
@@ -82,9 +82,8 @@ public class CallNumberService {
                 //Customer customer = customerRepository.findCustomerByUsername(userServiceQMS.getUsername());
                 listCustomerMiss.add(userServiceQMS);
             }
-
-            counterDTO.setWaitingCustomerList(listCustomerMiss);
         }
+        counterDTO.setWaitingCustomerList(listCustomerMiss);
 
         String currentNumer = counter.getOrderNumber();
         //Done khách hàng hiện tại
@@ -107,7 +106,6 @@ public class CallNumberService {
             counter.setOrderNumber(null);
 
             counterRepository.save(counter);
-            return SUCCESS_RESPONSE("Đã hết khách hàng đợi", counter);
         } else {
             List<String> listNumberWaiting = Arrays.asList(waitingCustomerIds.split(","));
             String nextNumber = listNumberWaiting.get(0);
@@ -156,10 +154,6 @@ public class CallNumberService {
         counterDTO.setCounterName(counter.getName());
         counterDTO.setOrderNumber(counter.getOrderNumber());
         counterDTO.setStatus(counter.getStatus());
-
-
-
-
 
         counterRepository.save(counter);
 
