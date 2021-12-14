@@ -15,9 +15,11 @@ public class CallNumberController {
     @Autowired
     private CallNumberService callNumberService;
 
-    @GetMapping("/active-counter")
-    public ResponseEntity activeCounter(@RequestParam("counterId") Integer counterId) {
-        ServiceResponse response = callNumberService.activeCounter(counterId);
+    @PostMapping("/active-counter")
+    public ResponseEntity activeCounter(@RequestBody CounterDTO counterDTO) {
+        int counterId = counterDTO.getCounterId();
+        String serviceCode = counterDTO.getServiceCode();
+        ServiceResponse response = callNumberService.activeCounter(counterId, serviceCode);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
@@ -30,6 +32,14 @@ public class CallNumberController {
     @GetMapping("/make-miss-number")
     public ResponseEntity missNumber(@RequestParam("counterId")Integer counterId) {
         ServiceResponse response = callNumberService.missCustomer(counterId);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @GetMapping("/change-counter")
+    public ResponseEntity<?> changeCounter(@RequestParam Integer counterIdFrom,
+                                           @RequestParam Integer counterIdTo,
+                                           @RequestParam String number) {
+        ServiceResponse response = callNumberService.changeCounter(number, counterIdFrom, counterIdTo);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 }

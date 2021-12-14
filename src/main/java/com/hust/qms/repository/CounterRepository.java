@@ -20,4 +20,6 @@ public interface CounterRepository extends JpaRepository<Counter, Integer> {
     @Query(value = "UPDATE counters SET service_name = :serviceName WHERE service_id = :serviceId", nativeQuery = true)
     @Transactional
     Integer updateServiceName(@Param("serviceName") String serviceName, @Param("serviceId") Long serviceId);
+
+    List<Counter> findAllByStatusAndAndServiceId(String status, Long serviceId);
 }

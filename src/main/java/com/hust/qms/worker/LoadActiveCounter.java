@@ -32,12 +32,15 @@ public class LoadActiveCounter {
 
         List<UserServiceQMS> serviceQMSList = userServiceQMSRepository.findUserServiceQMSByStatus(RESERVE);
 
-        List<Counter> counterList = counterRepository.findAllByStatus(ACTIVE);
+        //List<Counter> counter = counterRepository.findAllByStatus(ACTIVE);
 
-        if (serviceQMSList != null && counterList != null && counterList.size() != 0 && serviceQMSList.size() != 0) {
+        if (serviceQMSList != null && serviceQMSList.size() != 0) {
+
             int index = 0; //Chỉ số counter có ít hàng đợi nhất
 
             for (UserServiceQMS userServiceQMS: serviceQMSList) {
+                List<Counter> counterList = counterRepository.findAllByStatusAndAndServiceId(ACTIVE, userServiceQMS.getServiceId());
+                if (counterList == null || counterList.size() == 0) continue;
                 int indexOrderNull = -1;
                 for (int i = 0; i < counterList.size(); i++) {
                     Counter counter = counterList.get(i);

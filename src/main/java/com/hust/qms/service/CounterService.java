@@ -36,9 +36,6 @@ public class CounterService {
     }
 
     public ServiceResponse counterDetail (Integer counterId) {
-
-
-
         Counter counter = counterRepository.findCounterByIdAndStatus(counterId, ACTIVE);
 
         if (counter == null) {

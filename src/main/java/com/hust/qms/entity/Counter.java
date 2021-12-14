@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+import static com.hust.qms.common.Const.Status.INACTIVE;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data

@@ -27,4 +27,6 @@ public interface UserServiceQMSRepository extends JpaRepository<UserServiceQMS, 
 
     @Query(value = "SELECT * FROM user_services WHERE customer_id = :userId and created_at >= :today and status != :status", nativeQuery = true)
     List<UserServiceQMS> getUserServiceQMSByCustomerIdAndNotStatus(@Param("userId") Long userId, @Param("today") String today, @Param("status") String status);
+
+    UserServiceQMS getUserServiceQMSById(Long ticketId);
 }

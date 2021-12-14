@@ -21,7 +21,7 @@ public class ResetSerialNumber {
     @Autowired
     private CounterRepository counterRepository;
 
-    @Scheduled(cron = "0 0 0 * * *") //00:00:00 load lại dữ liệu
+    //@Scheduled(cron = "0 0 0 * * *") //00:00:00 load lại dữ liệu
     //@Scheduled(fixedRate = 10000)
     protected void resetDataSerialNumber() {
         orderNumberRepository.deleteAll();
@@ -30,24 +30,28 @@ public class ResetSerialNumber {
         List<Counter> counterList = counterRepository.findAll();
 
         for (Counter counter : counterList) {
-            counter.setStatus(INACTIVE);
-            counter.setCustomerId(null);
-            counter.setFirstNameCustomer(null);
-            counter.setLastNameCustomer(null);
-            counter.setFirstNameCustomer(null);
-            counter.setFirstNameMember(null);
-            counter.setLastNameMember(null);
-            counter.setFullNameMember(null);
-            counter.setMemberId(null);
-            counter.setOrderNumber(null);
-            counter.setWaitingCustomerIds(null);
-            counter.setServiceName(null);
-            counter.setServiceId(null);
-            counter.setFullNameCustomer(null);
-            counter.setMissedCustomerIds(null);
-
+            counter = reset(counter);
             counterRepository.save(counter);
         }
 
+    }
+
+    protected Counter reset(Counter counter) {
+        counter.setStatus(INACTIVE);
+        counter.setCustomerId(null);
+        counter.setFirstNameCustomer(null);
+        counter.setLastNameCustomer(null);
+        counter.setFirstNameCustomer(null);
+        counter.setFirstNameMember(null);
+        counter.setLastNameMember(null);
+        counter.setFullNameMember(null);
+        counter.setMemberId(null);
+        counter.setOrderNumber(null);
+        counter.setWaitingCustomerIds(null);
+        counter.setServiceName(null);
+        counter.setServiceId(null);
+        counter.setFullNameCustomer(null);
+        counter.setMissedCustomerIds(null);
+        return counter;
     }
 }

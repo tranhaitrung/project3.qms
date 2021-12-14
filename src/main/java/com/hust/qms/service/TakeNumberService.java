@@ -59,9 +59,9 @@ public class TakeNumberService {
         String today = simpleDateFormat.format(new Timestamp(System.currentTimeMillis()));
         List<UserServiceQMS> userServiceQMSList = userServiceQMSRepository.getUserServiceQMSByCustomerIdAndNotStatus(userId, today, DONE);
 
-        if (userServiceQMSList.size() > 0 ) {
-            return BAD_RESPONSE("Số của bạn đang được xử lý!");
-        }
+//        if (userServiceQMSList.size() > 0 ) {
+//            return BAD_RESPONSE("Số của bạn đang được xử lý!");
+//        }
         OrderNumber orderNumber = orderNumberRepository.getLastOrderNumber();
 
         long no = orderNumber == null ? 1 : orderNumber.getNumber()+1;
@@ -76,7 +76,7 @@ public class TakeNumberService {
 
         orderNumberRepository.save(currentOrderNumber);
 
-        List<Counter>  counterList = counterRepository.findAllByStatus(ACTIVE);
+        List<Counter>  counterList = counterRepository.findAllByStatusAndAndServiceId(ACTIVE, serviceQMS.getId());
 
         if (counterList.size() == 0) {
             UserServiceQMS userServiceQMS = UserServiceQMS.builder()
