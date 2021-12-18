@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
+    Feedback getFeedbackByTicketIdAndCustomerId(Long ticketId, Long customerId);
+
+    Feedback getFeedbackByTicketId(Long ticketId);
 }

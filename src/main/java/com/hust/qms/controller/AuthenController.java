@@ -20,7 +20,7 @@ public class AuthenController {
 
     @PostMapping("/sendCode")
     public ResponseEntity<?> sendVerifyCode(@RequestBody UserDTO userDTO) {
-        ServiceResponse response = authenService.sendCode(userDTO);
+        ServiceResponse response = authenService.resendVerifyCode(userDTO);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
@@ -30,9 +30,16 @@ public class AuthenController {
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
+    @PostMapping("/validate")
+    public ResponseEntity<?> validateActive(@RequestBody UserDTO userDTO) {
+        ServiceResponse response = authenService.validateAccountActive(userDTO);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(authenService.login(userDTO));
+        ServiceResponse response = authenService.login(userDTO);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
     @PostMapping("/create-member")

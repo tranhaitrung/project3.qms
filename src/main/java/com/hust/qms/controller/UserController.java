@@ -1,5 +1,6 @@
 package com.hust.qms.controller;
 
+import com.hust.qms.dto.ChangePassDTO;
 import com.hust.qms.dto.UserDTO;
 import com.hust.qms.entity.Customer;
 import com.hust.qms.entity.Member;
@@ -47,6 +48,18 @@ public class UserController {
     @PostMapping("/block-user")
     public ResponseEntity blockUser(UserDTO userDTO) {
         ServiceResponse response = userService.setStatusUser(userDTO);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @PostMapping("/change-pass")
+    public ResponseEntity changePass(@RequestBody ChangePassDTO changePassDTO) {
+        ServiceResponse response = userService.changePass(changePassDTO);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @GetMapping ("/info-user-token")
+    public ResponseEntity infoByToken() {
+        ServiceResponse response = userService.getUserInfoByToken();
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 }

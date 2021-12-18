@@ -1,5 +1,6 @@
 package com.hust.qms.controller;
 
+import com.hust.qms.dto.ChangeCounterDTO;
 import com.hust.qms.dto.CounterDTO;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.service.CallNumberService;
@@ -35,10 +36,11 @@ public class CallNumberController {
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
-    @GetMapping("/change-counter")
-    public ResponseEntity<?> changeCounter(@RequestParam Integer counterIdFrom,
-                                           @RequestParam Integer counterIdTo,
-                                           @RequestParam String number) {
+    @PostMapping("/change-counter")
+    public ResponseEntity<?> changeCounter(@RequestBody ChangeCounterDTO changeCounterDTO) {
+        String number = changeCounterDTO.getNumber();
+        Integer counterIdFrom = changeCounterDTO.getCounterIdFrom();
+        Integer counterIdTo = changeCounterDTO.getCounterIdTo();
         ServiceResponse response = callNumberService.changeCounter(number, counterIdFrom, counterIdTo);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }

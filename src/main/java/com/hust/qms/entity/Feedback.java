@@ -1,6 +1,7 @@
 package com.hust.qms.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.sql.Timestamp;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "feedback")
 public class Feedback {
     @Id
@@ -27,6 +29,6 @@ public class Feedback {
     private Integer score;
     private String comment;
     private Long ticketId;
-    private Timestamp created_at;
-    private Timestamp updated_at;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 }
