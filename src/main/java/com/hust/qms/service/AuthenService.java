@@ -25,7 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.rmi.activation.ActivationException;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.hust.qms.common.Const.Role.*;
@@ -71,15 +73,34 @@ public class AuthenService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    public Object login(UserDTO input) {
-
+    public ServiceResponse validateAccountActive(UserDTO input) {
         User user = userRepository.findByUsername(input.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + input.getUsername()));
 
-        if (INACTIVE.equals(user.getStatus())) {
-            return BAD_RESPONSE("Vui lòng kích hoạt tài khoản bằng mã 6 chữ số!");
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(input.getUsername(), input.getPassword()));
+
+        UserDTO userDTO = UserDTO.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .build();
+        if (user.getVerify_email() == 0) {
+            generateVerifyCode(userDTO);
+            sendCode(userDTO);
         }
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("emailVerify", user.getVerify_email());
+        response.put("phoneVerify", user.getVerify_phone());
+        return SUCCESS_RESPONSE("SUCCESS", response);
+    }
+
+    public ServiceResponse login(UserDTO input) {
+
+        User user = userRepository.findByUsername(input.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + input.getUsername()));
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(input.getUsername(), input.getPassword()));
@@ -99,8 +120,7 @@ public class AuthenService {
                 user.getDisplayName(),
                 user.getAvatar(),
                 roles);
-
-        return jwtResponse;
+        return SUCCESS_RESPONSE("SUCCESS", jwtResponse);
     }
 
 
@@ -127,6 +147,8 @@ public class AuthenService {
                 .fullName(fullname)
                 .displayName(fullname)
                 .status(INACTIVE)
+                .verify_phone(0)
+                .verify_email(0)
                 .avatar("https://res.cloudinary.com/litchitech/image/upload/v1638332250/PROJECT3/avatardefault_odgzm2.jpg")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
@@ -284,10 +306,20 @@ public class AuthenService {
         return RESPONSE_MESSAGES("SUCCESS", HttpStatus.SC_OK, "Gửi mã xác nhận thành công");
     }
 
+    public ServiceResponse resendVerifyCode(UserDTO userDTO) {
+        User user = userRepository.getUserByUsername(userDTO.getUsername());
+        userDTO.setUserId(user.getId());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
+        generateVerifyCode(userDTO);
+        sendCode(userDTO);
+        return SUCCESS_RESPONSE("SUCCESS", null);
+    }
+
     public void generateVerifyCode(UserDTO userDTO) {
         String code = RandomStringUtils.randomNumeric(6);
 
-        Long expire = System.currentTimeMillis()+60000*10;
+        Long expire = System.currentTimeMillis()+60000*5;
 
         VerifyCode verifyCode = VerifyCode.builder()
                 .userId(userDTO.getUserId())
@@ -316,6 +348,7 @@ public class AuthenService {
         }
 
         user.setStatus(ACTIVE);
+        user.setVerify_email(1);
         user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         userRepository.save(user);
 

@@ -1,15 +1,15 @@
 package com.hust.qms.service;
 
 import com.hust.qms.dto.OrderNumberDTO;
-import com.hust.qms.entity.Counter;
-import com.hust.qms.entity.OrderNumber;
-import com.hust.qms.entity.ServiceQMS;
-import com.hust.qms.entity.User;
-import com.hust.qms.entity.UserServiceQMS;
+import com.hust.qms.entity.*;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.repository.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -18,6 +18,7 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static com.hust.qms.common.Const.Status.ACTIVE;
 import static com.hust.qms.common.Const.StatusUserService.*;
@@ -29,7 +30,7 @@ public class TakeNumberService {
     private UserRepository userRepository;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private FeedbackRepository feedbackRepository;
 
     @Autowired
     private OrderNumberRepository orderNumberRepository;
@@ -163,7 +164,20 @@ public class TakeNumberService {
             userServiceQMS.setStatus(WAITING);
         }
         counterRepository.save(counter);
-        userServiceQMSRepository.save(userServiceQMS);
+        UserServiceQMS response = userServiceQMSRepository.save(userServiceQMS);
+
+        Feedback feedback = Feedback.builder()
+                .serviceName(userServiceQMS.getServiceName())
+                .serviceId(userServiceQMS.getServiceId())
+                .ticketId(response.getId())
+                .customerFullname(user.getFullName())
+                .customerId(userId)
+                .memberId(response.getMemberId())
+                .memberFullname(response.getFullNameMember())
+                .counterId(response.getCounterId())
+                .createdAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        feedbackRepository.save(feedback);
 
         OrderNumberDTO orderNumberDTO = OrderNumberDTO.builder()
                 .serviceCode(userServiceQMS.getServiceCode())
@@ -184,6 +198,24 @@ public class TakeNumberService {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String today = simpleDateFormat.format(new Timestamp(System.currentTimeMillis()));
         List<UserServiceQMS> userServiceQMS = userServiceQMSRepository.getUserServiceQMSByCustomerId(userId, today);
-        return SUCCESS(userServiceQMS.get(0));
+        if (userServiceQMS.size() > 0) return SUCCESS_RESPONSE("SUCCESS",userServiceQMS.get(0));
+        return SUCCESS_RESPONSE("SUCCESS", null);
+    }
+
+    public ServiceResponse listUserNumber(String search, Long userId, String serviceCode, Date fromDate, Date toDate, String status, Integer pageNo, Integer pageSize) {
+        Long id = userId != null ? userId : baseService.getCurrentId();
+        pageNo = pageNo > 0 ? pageNo - 1 : pageNo;
+        int page = pageNo*pageSize;
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+//        if (StringUtils.isBlank(serviceCode)) serviceCode = null;
+//        if (StringUtils.isBlank(status)) status = null;
+//        Page<UserServiceQMS> serviceQMSPage = userServiceQMSRepository.findUserServiceQMSByCustomerIdAndSearch(id, serviceCode, fromDate, toDate, status, pageable);
+
+        List<Map<String,Object>> listTicket = userServiceQMSRepository.searchListOrderNumberCustomer("LIST", search, id, serviceCode, fromDate, toDate, status, page, pageSize);
+        int totalTicket = userServiceQMSRepository.countListOrderNumberCustomer("COUNT", search, id, serviceCode, fromDate, toDate, status, page, pageSize);
+
+        Page serviceQMSPage = new PageImpl(listTicket, pageable, totalTicket);
+
+        return SUCCESS_RESPONSE("SUCCESS", serviceQMSPage);
     }
 }

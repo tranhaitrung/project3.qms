@@ -2,10 +2,7 @@ package com.hust.qms.service;
 
 import com.hust.qms.dto.CounterDTO;
 
-import com.hust.qms.entity.Counter;
-import com.hust.qms.entity.Member;
-import com.hust.qms.entity.ServiceQMS;
-import com.hust.qms.entity.UserServiceQMS;
+import com.hust.qms.entity.*;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.repository.*;
 import org.apache.commons.lang3.StringUtils;
@@ -40,10 +37,7 @@ public class CallNumberService {
     private UserServiceQMSRepository userServiceQMSRepository;
 
     @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private OrderNumberRepository orderNumberRepository;
+    private FeedbackRepository feedbackRepository;
 
     @Autowired
     private ServiceQMSRepository serviceQMSRepository;
@@ -80,6 +74,11 @@ public class CallNumberService {
             userServiceQMS.setStatus(DONE);
             userServiceQMS.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             userServiceQMSRepository.save(userServiceQMS);
+
+            Feedback feedback = feedbackRepository.getFeedbackByTicketId(userServiceQMS.getId());
+            feedback.setMemberId(counter.getMemberId());
+            feedback.setMemberFullname(counter.getFullNameMember());
+            feedbackRepository.save(feedback);
         }
 
         counter = nextNumberCounter(counter);
@@ -181,6 +180,11 @@ public class CallNumberService {
         counterRepository.save(counterFrom);
         counterRepository.save(counterTo);
 
+        Feedback feedback = feedbackRepository.getFeedbackByTicketId(userServiceQMS.getId());
+        feedback.setCounterId(counterIdTo);
+        feedback.setMemberFullname(counterTo.getFullNameMember());
+        feedbackRepository.save(feedback);
+
         List<UserServiceQMS> listWaitingCustomer = getListCustomerByStringNumber(counterFrom.getWaitingCustomerIds(), WAITING, counterFrom.getId());
         List<UserServiceQMS> listMissedCustomer = getListCustomerByStringNumber(counterFrom.getMissedCustomerIds(), MISSED, counterFrom.getId());
 
@@ -211,6 +215,12 @@ public class CallNumberService {
             UserServiceQMS userNext = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(nextNumber, WAITING, counter.getId());
 
             userNext.setStatus(ACTIVE);
+            userNext.setCounterName(counter.getName());
+            userNext.setCounterId(counter.getId());
+            userNext.setMemberId(counter.getMemberId());
+            userNext.setFullNameMember(counter.getFullNameMember());
+            userNext.setLastNameMember(counter.getLastNameMember());
+            userNext.setFirstNameMember(counter.getFirstNameMember());
             userNext.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             userServiceQMSRepository.save(userNext);
 

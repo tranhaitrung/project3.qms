@@ -1,13 +1,19 @@
 package com.hust.qms.repository;
 
 import com.hust.qms.entity.UserServiceQMS;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import static com.hust.qms.common.Const.Procedures.LIST_CUSTOMER_ORDER_NUMBER;
 
 @Repository
 public interface UserServiceQMSRepository extends JpaRepository<UserServiceQMS, Long> {
@@ -29,4 +35,13 @@ public interface UserServiceQMSRepository extends JpaRepository<UserServiceQMS, 
     List<UserServiceQMS> getUserServiceQMSByCustomerIdAndNotStatus(@Param("userId") Long userId, @Param("today") String today, @Param("status") String status);
 
     UserServiceQMS getUserServiceQMSById(Long ticketId);
+
+    @Query(value = "SELECT * FROM user_services WHERE customer_id = :userId and (:serviceCode is null or FIND_IN_SET(service_code,:serviceCode)) and (:fromDate is null or created_at >= :fromDate) and (:toDate is null or created_at <= :toDate) and (:status is null or FIND_IN_SET(status,:status)) order by created_at desc", nativeQuery = true)
+    Page<UserServiceQMS> findUserServiceQMSByCustomerIdAndSearch(@Param("userId") Long userId, @Param("serviceCode") String serviceCode, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate, @Param("status") String status, Pageable pageable);
+
+    @Query(value = LIST_CUSTOMER_ORDER_NUMBER, nativeQuery = true)
+    List<Map<String,Object>> searchListOrderNumberCustomer(String typeQuery, String search, Long userId, String serviceCode, Date fromDate, Date toDate, String status, int pageNo, int pageSize);
+
+    @Query(value = LIST_CUSTOMER_ORDER_NUMBER, nativeQuery = true)
+    Integer countListOrderNumberCustomer(String typeQuery, String search, Long userId, String serviceCode, Date fromDate, Date toDate, String status, int pageNo, int pageSize);
 }

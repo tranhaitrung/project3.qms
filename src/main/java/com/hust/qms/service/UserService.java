@@ -1,5 +1,7 @@
 package com.hust.qms.service;
 
+import com.hust.qms.config.JwtUtils;
+import com.hust.qms.dto.ChangePassDTO;
 import com.hust.qms.dto.UserDTO;
 import com.hust.qms.entity.Customer;
 import com.hust.qms.entity.Member;
@@ -12,6 +14,10 @@ import com.hust.qms.repository.PermissionUserRoleRepository;
 import com.hust.qms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -19,8 +25,7 @@ import java.util.List;
 
 import static com.hust.qms.common.Const.Role.*;
 import static com.hust.qms.common.Const.Status.ACTIVE;
-import static com.hust.qms.exception.ServiceResponse.FORBIDDEN_RESPONSE;
-import static com.hust.qms.exception.ServiceResponse.SUCCESS_RESPONSE;
+import static com.hust.qms.exception.ServiceResponse.*;
 
 @Service
 public class UserService {
@@ -43,6 +48,15 @@ public class UserService {
     @Autowired
     private PermissionUserRoleRepository permissionUserRoleRepository;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private PasswordEncoder encoder;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
     public ServiceResponse updateInfoUser(UserDTO userDTO) {
         Long userId = baseService.getCurrentId();
 
@@ -50,48 +64,52 @@ public class UserService {
 
         List<String> roles = baseService.getCurrentRoles();
 
-        user.setDisplayName(userDTO.getDisplayName());
+//        user.setDisplayName(userDTO.getDisplayName());
 //        user.setCountryCode(userDTO.getCountryCode());
 //        user.setCountry(userDTO.getCountry());
-        user.setCity(userDTO.getCity());
+//        user.setCity(userDTO.getCity());
         user.setBirthday(userDTO.getBirthday());
         user.setAddress(userDTO.getAddress());
-        user.setDistrict(userDTO.getDistrict());
-        user.setEmail(userDTO.getEmail());
+//        user.setDistrict(userDTO.getDistrict());
+//        user.setEmail(userDTO.getEmail());
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setFullName(String.format("%s %s", userDTO.getFirstName(), userDTO.getLastName()));
         user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         user.setUpdatedBy(userId);
         user.setPhone(userDTO.getPhone());
+        userDTO.setAvatar(user.getAvatar());
+        user.setDisplayName(String.format("%s %s", userDTO.getFirstName(), userDTO.getLastName()));
 
         if (roles.contains(CUSTOMER)) {
             Customer customer = customerRepository.findCustomerByUsername(user.getUsername());
             customer.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-            customer.setCity(userDTO.getCity());
-            customer.setDistrict(userDTO.getDistrict());
-            customer.setFirstName(userDTO.getFirstName());
-            customer.setLastName(userDTO.getLastName());
+            customer.setCity(user.getCity());
+            customer.setDistrict(user.getDistrict());
+            customer.setFirstName(user.getFirstName());
+            customer.setLastName(user.getLastName());
+            customer.setBirthday(user.getBirthday());
             customer.setFullName(String.format("%s %s", userDTO.getFirstName(), userDTO.getLastName()));
             customer.setUpdatedBy(userId);
-            customer.setDisplayName(userDTO.getDisplayName());
-            customer.setEmail(userDTO.getEmail());
-            customer.setPhone(userDTO.getPhone());
+            customer.setDisplayName(user.getFullName());
+            customer.setEmail(user.getEmail());
+            customer.setPhone(user.getPhone());
 
             customerRepository.save(customer);
         }
 
         if (roles.contains(MANAGER) || roles.contains(EMPLOYEE)) {
             Member member = memberRepository.findMemberByUserId(user.getId());
-            member.setCity(userDTO.getCity());
-            member.setDistrict(userDTO.getDistrict());
-            member.setFirstName(userDTO.getFirstName());
-            member.setLastName(userDTO.getLastName());
-            member.setFullName(String.format("%s %s", userDTO.getFirstName(), userDTO.getLastName()));
+            member.setCity(user.getCity());
+            member.setDistrict(user.getDistrict());
+            member.setFirstName(user.getFirstName());
+            member.setLastName(user.getLastName());
+            member.setFullName(String.format("%s %s", user.getFirstName(), user.getLastName()));
             member.setUpdatedBy(userId);
-            member.setDisplayName(userDTO.getDisplayName());
-            member.setEmail(userDTO.getEmail());
-            member.setPhone(userDTO.getPhone());
+            member.setDisplayName(user.getFullName());
+            member.setEmail(user.getEmail());
+            member.setPhone(user.getPhone());
+            member.setBirthday(user.getBirthday());
             member.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
             memberRepository.save(member);
@@ -115,9 +133,38 @@ public class UserService {
         userRepository.save(user);
 
         return null;
-
     }
 
+    public ServiceResponse changePass(ChangePassDTO input) {
+        Long userId = baseService.getCurrentId();
+        User user = userRepository.getById(userId);
 
+        boolean isCheck = encoder.matches(input.getPassword(), user.getPassword());
+        if (!isCheck) return BAD_RESPONSE("Change pass fail");
+
+        user.setPassword(encoder.encode(input.getNewPass()));
+        user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        userRepository.save(user);
+        return SUCCESS_RESPONSE("SUCCESS", null);
+    }
+
+    public ServiceResponse getUserInfoByToken() {
+        User user = userRepository.getById(baseService.getCurrentId());
+        UserDTO userDTO = UserDTO.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .avatar(user.getAvatar())
+                .birthday(user.getBirthday())
+                .address(user.getAddress())
+                .displayName(user.getDisplayName())
+                .status(user.getStatus())
+                .build();
+        return SUCCESS_RESPONSE("SUCCESS", userDTO);
+    }
 
 }

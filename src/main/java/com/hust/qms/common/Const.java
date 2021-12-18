@@ -39,4 +39,8 @@ public class Const {
         static final public String WAITING = "WAITING"; //Đang đợi gọi tại quầy
         static final public String DONE = "DONE"; //Hoàn thành
     }
+
+    public class Procedures {
+        public static final String LIST_CUSTOMER_ORDER_NUMBER = "call pro_customer_01_order_number(:typeQuery, :search, :userId, :serviceCode, :fromDate, :toDate, :status, :pageNo, :pageSize)";
+    }
 }
