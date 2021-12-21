@@ -20,4 +20,16 @@ public class FeedbackController {
         ServiceResponse response = feedBackService.feedbackCustomer(dto);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
+
+    @GetMapping("/get-list-score")
+    public ResponseEntity<?> listScore() {
+        ServiceResponse response = feedBackService.totalFeedbackScore();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @GetMapping("/statistic-around-seven-day")
+    public ResponseEntity<?> feedbackStatisticAroundSevenDay() {
+        ServiceResponse response = feedBackService.feedbackStatisticAroundSevenDay();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
 }

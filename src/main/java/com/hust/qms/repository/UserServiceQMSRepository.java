@@ -44,4 +44,10 @@ public interface UserServiceQMSRepository extends JpaRepository<UserServiceQMS, 
 
     @Query(value = LIST_CUSTOMER_ORDER_NUMBER, nativeQuery = true)
     Integer countListOrderNumberCustomer(String typeQuery, String search, Long userId, String serviceCode, Date fromDate, Date toDate, String status, int pageNo, int pageSize);
+
+    @Query(value = "SELECT count(id) as total, Date(created_at) as createdAt from user_services group by Date(created_at) order by created_at desc limit 7", nativeQuery = true)
+    List<Map<String,Object>> ticketStatisticAroundSevenDate();
+
+    @Query(value = "SELECT count(id) as total, date(created_at) as createdAt FROM user_services WHERE service_code = :serviceCode group by Date(created_at) order by created_at limit 7", nativeQuery = true)
+    List<Map<String, Object>> eachTicketStatisticAroundSevenDate(String serviceCode);
 }
