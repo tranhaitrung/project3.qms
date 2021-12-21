@@ -83,7 +83,7 @@ public class CallNumberService {
 
         counter = nextNumberCounter(counter);
         List<UserServiceQMS> listCustomerMiss = getListCustomerByStringNumber(counter.getMissedCustomerIds(), MISSED, counterId);
-        List<UserServiceQMS> listCustomerWaiting = new ArrayList<>();
+        List<UserServiceQMS> listCustomerWaiting = getListCustomerByStringNumber(counter.getWaitingCustomerIds(), WAITING, counterId);
 
         CounterDTO counterDTO = new CounterDTO(counter);
 
