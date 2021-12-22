@@ -50,4 +50,11 @@ public interface UserServiceQMSRepository extends JpaRepository<UserServiceQMS, 
 
     @Query(value = "SELECT count(id) as total, date(created_at) as createdAt FROM user_services WHERE service_code = :serviceCode group by Date(created_at) order by created_at limit 7", nativeQuery = true)
     List<Map<String, Object>> eachTicketStatisticAroundSevenDate(String serviceCode);
+
+    @Query(value = "SELECT * FROM user_services WHERE " +
+            "(:search is null or LOCATE(:search, CONCAT_WS(', ', counter_name, full_name_customer, full_name_member, service_code, service_name))) " +
+            "and (:serviceCode is null or FIND_IN_SET(service_code,:serviceCode)) " +
+            "and (:fromDate is null or created_at >= :fromDate ) and (:toDate is null or created_at <= :toDate) " +
+            "and (:status is null or FIND_IN_SET(status,:status)) order by created_at desc", nativeQuery = true)
+    Page<UserServiceQMS> listTicket(@Param("search") String search, @Param("serviceCode") String serviceCode, @Param("status") String status, @Param("fromDate") String fromDate, @Param("toDate") String toDate, Pageable pageable);
 }

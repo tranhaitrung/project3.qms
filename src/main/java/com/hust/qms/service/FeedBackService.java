@@ -1,10 +1,14 @@
 package com.hust.qms.service;
 
 import com.hust.qms.entity.Feedback;
+import com.hust.qms.entity.UserServiceQMS;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.repository.FeedbackRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 
@@ -81,5 +85,13 @@ public class FeedBackService {
 
         }
         return ServiceResponse.SUCCESS_RESPONSE("SUCCESS", map);
+    }
+
+    public ServiceResponse listFeedback(String search, Integer score , int pageNo, int pageSize) {
+        pageNo = pageNo > 0 ? pageNo - 1 : pageNo;
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        search = StringUtils.isBlank(search) ? null : search;
+        Page<Feedback> list = feedbackRepository.listFeedback(search, score, pageable);
+        return ServiceResponse.SUCCESS_RESPONSE("SUCCESS", list);
     }
 }

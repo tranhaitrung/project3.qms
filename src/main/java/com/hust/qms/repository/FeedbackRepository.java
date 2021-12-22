@@ -1,6 +1,8 @@
 package com.hust.qms.repository;
 
 import com.hust.qms.entity.Feedback;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,4 +21,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     @Query(value = "select count(id) as total, Date(created_at) as feedbackAt from feedback where score is not null and score != 0 group by Date(created_at) order by created_at desc limit 7", nativeQuery = true)
     List<Map<String, Object>> feedbackStatisticAroundSevenDay();
+
+    @Query(value = "SELECT * FROM feedback WHERE score != 0 and (:search is null or LOCATE(:search, CONCAT_WS(', ', member_fullname, service_name))) and (:score is null or score = :score) ", nativeQuery = true)
+    Page<Feedback> listFeedback(String search, Integer score, Pageable pageable);
 }
