@@ -1,10 +1,17 @@
 package com.hust.qms.service;
 
+import com.hust.qms.dto.TicketDTO;
 import com.hust.qms.entity.ServiceQMS;
+import com.hust.qms.entity.UserServiceQMS;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.repository.ServiceQMSRepository;
 import com.hust.qms.repository.UserServiceQMSRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -63,4 +70,53 @@ public class TicketService {
 
         return ServiceResponse.SUCCESS_RESPONSE("SUCCESS", mapTicket);
     }
+
+    public ServiceResponse getListTicket(String search, String serviceCode, String status, Date fromDate, Date toDate, int pageNo, int pageSize) {
+        pageNo = pageNo > 0 ? pageNo - 1 : pageNo;
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        search = StringUtils.isBlank(search) ? null : search;
+        status = StringUtils.isBlank(status) ? null : status;
+        serviceCode = StringUtils.isBlank(serviceCode) ? null : serviceCode;
+        String fromDateStr = null;
+        String toDateStr = null;
+        if (fromDate != null) {
+            fromDateStr = dateFormat.format(fromDate)+ " 00:00:00";
+        }
+        if (toDate != null) {
+            toDateStr = dateFormat.format(toDate) + " 23:59:59";
+        }
+        Page<UserServiceQMS> page = userServiceQMSRepository.listTicket(search, serviceCode, status, fromDateStr, toDateStr, pageable);
+        List<UserServiceQMS> list = page.getContent();
+        List<TicketDTO> listDTO = new ArrayList<>();
+        for (UserServiceQMS u: list) {
+            TicketDTO ticketDTO = TicketDTO.builder()
+                    .id(u.getId())
+                    .counterId(u.getCounterId())
+                    .counterName(u.getCounterName())
+                    .serviceId(u.getServiceId())
+                    .serviceCode(u.getServiceCode())
+                    .serviceName(u.getServiceName())
+                    .customerId(u.getCustomerId())
+                    .firstNameCustomer(u.getFirstNameCustomer())
+                    .lastNameCustomer(u.getLastNameCustomer())
+                    .fullNameCustomer(u.getFullNameCustomer())
+                    .memberId(u.getMemberId())
+                    .firstNameMember(u.getFirstNameMember())
+                    .lastNameMember(u.getLastNameMember())
+                    .fullNameMember(u.getFullNameMember())
+                    .username(u.getUsername())
+                    .number(u.getNumber())
+                    .createdAt(u.getCreatedAt())
+                    .updatedAt(u.getUpdatedAt())
+                    .createdDisplay(dateFormat.format(u.getCreatedAt()))
+                    .status(u.getStatus())
+                    .build();
+            listDTO.add(ticketDTO);
+        }
+        Page<TicketDTO> dtoPage = new PageImpl<>(listDTO,pageable, page.getTotalElements());
+        return ServiceResponse.SUCCESS_RESPONSE("SUCCESS", dtoPage);
+    }
+
 }

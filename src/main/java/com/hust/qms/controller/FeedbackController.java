@@ -32,4 +32,13 @@ public class FeedbackController {
         ServiceResponse response = feedBackService.feedbackStatisticAroundSevenDay();
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
+
+    @GetMapping("/list-feedback")
+    public ResponseEntity<?> listFeedback(@RequestParam(required = false) String search,
+                                          @RequestParam(required = false) Integer score,
+                                          @RequestParam(defaultValue = "1") Integer pageNo,
+                                          @RequestParam(defaultValue = "10") Integer pageSize) {
+        ServiceResponse response = feedBackService.listFeedback(search, score, pageNo, pageSize);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
 }
