@@ -51,9 +51,19 @@ public class UserDTO {
 
     private Timestamp createdAt;
 
+    private Long createdAtLong;
+
+    private String createdAtStr;
+
+    private String birthdayDisplay;
+
     private Timestamp updatedAt;
 
     private Long updatedBy;
+
+    private String updatedAtStr;
+
+    private Long updatedAtLong;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Timestamp birthday;

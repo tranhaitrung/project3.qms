@@ -2,8 +2,11 @@ package com.hust.qms.service;
 
 import com.hust.qms.dto.UserDTO;
 import com.hust.qms.entity.Customer;
+import com.hust.qms.entity.Member;
+import com.hust.qms.entity.PermissionUserRole;
 import com.hust.qms.exception.ServiceResponse;
-import com.hust.qms.repository.CustomerRepository;
+import com.hust.qms.repository.MemberRepository;
+import com.hust.qms.repository.PermissionUserRoleRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,18 +14,22 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
-public class CustomerService {
-    @Autowired
-    private CustomerRepository customerRepository;
+public class MemberService {
 
-    public ServiceResponse listCustomer(String search, String status,Date fromDate, Date toDate, Integer pageNo, Integer pageSize) {
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private PermissionUserRoleRepository permissionUserRoleRepository;
+
+    public ServiceResponse listMember(String search, String status, Date fromDate, Date toDate, Integer pageNo, Integer pageSize) {
         int page = pageNo > 0 ? pageNo - 1 : pageNo;
 
         Pageable pageable = PageRequest.of(page, pageSize);
@@ -39,10 +46,11 @@ public class CustomerService {
             toDateStr = dateFormat.format(toDate) + " 23:59:59";
         }
 
-        Page<Customer> customerPage = customerRepository.listCustomer(search, status, fromDateStr, toDateStr, pageable);
-        List<Customer> list = customerPage.getContent();
+        Page<Member> memberPage = memberRepository.listMember(search, status, fromDateStr, toDateStr, pageable);
+        List<Member> list = memberPage.getContent();
         List<UserDTO> dtoList = new ArrayList<>();
-        for (Customer c : list) {
+        for (Member c : list) {
+            PermissionUserRole permissionUserRole = permissionUserRoleRepository.findAllByUserId(c.getUserId()).get(0);
             UserDTO userDTO = UserDTO.builder()
                     .userId(c.getUserId())
                     .displayName(c.getDisplayName())
@@ -61,6 +69,7 @@ public class CustomerService {
                     .country(c.getCountry())
                     .countryCode(c.getCountryCode())
                     .district(c.getDistrict())
+                    .roleCode(permissionUserRole.getRoleCode())
                     .status(c.getStatus())
                     .createdAt(c.getCreatedAt())
                     .createdAtLong(c.getCreatedAt().getTime())
@@ -73,28 +82,7 @@ public class CustomerService {
             dtoList.add(userDTO);
         }
 
-        Page pageDTO = new PageImpl(dtoList, pageable, customerPage.getTotalElements());
+        Page pageDTO = new PageImpl(dtoList, pageable, memberPage.getTotalElements());
         return ServiceResponse.SUCCESS_RESPONSE("SUCCESS", pageDTO);
-    }
-
-    public ServiceResponse customerStatisticRoundSevenDay() {
-        List<Map<String, Object>> mapList = customerRepository.customerStatistic();
-        int mapSize = mapList.size();
-        Map<String, Object> map = new HashMap<>();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        for (int i = 1; i < 8; i++) {
-            String keyDate = "date"+i;
-            String keyTotal = "total"+i;
-            if (mapSize < i) {
-                map.put(keyDate, 0);
-                map.put(keyTotal, 0);
-                continue;
-            } else {
-                map.put(keyTotal, mapList.get(i-1).get("total"));
-                map.put(keyDate, mapList.get(i-1).get("createdAt"));
-            }
-
-        }
-        return ServiceResponse.SUCCESS_RESPONSE("SUCCESS", map);
     }
 }
