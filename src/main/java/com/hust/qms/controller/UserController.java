@@ -45,8 +45,8 @@ public class UserController {
         return null;
     }
 
-    @PostMapping("/block-user")
-    public ResponseEntity blockUser(UserDTO userDTO) {
+    @PostMapping("/set-status-user")
+    public ResponseEntity setStatusUser(@RequestBody UserDTO userDTO) {
         ServiceResponse response = userService.setStatusUser(userDTO);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
@@ -58,8 +58,8 @@ public class UserController {
     }
 
     @GetMapping ("/info-user-token")
-    public ResponseEntity infoByToken() {
-        ServiceResponse response = userService.getUserInfoByToken();
+    public ResponseEntity infoByToken(@RequestParam(required = false) Long userId) {
+        ServiceResponse response = userService.getUserInfoByToken(userId);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 }

@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static com.hust.qms.common.Const.Role.*;
@@ -126,13 +127,29 @@ public class UserService {
     @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,MANAGER')")
     public ServiceResponse setStatusUser(UserDTO input) {
         User user = userRepository.getUserByUsername(input.getUsername());
-
+        if (user == null) {
+            return NOT_FOUND_RESPONSE("Not found user", null);
+        }
+        List<PermissionUserRole> permissionUserRoles = permissionUserRoleRepository.findAllByUserId(user.getId());
+        if (permissionUserRoles.get(0).getRoleCode().equals(CUSTOMER)) {
+            Customer customer = customerRepository.findCustomerByUsername(user.getUsername());
+            customer.setStatus(input.getStatus());
+            customer.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            customer.setUpdatedBy(baseService.getCurrentId());
+            customerRepository.save(customer);
+        }
+        else {
+            Member member = memberRepository.findMemberByUserId(user.getId());
+            member.setStatus(input.getStatus());
+            member.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            member.setUpdatedBy(baseService.getCurrentId());
+            memberRepository.save(member);
+        }
         user.setStatus(input.getStatus());
         user.setUpdatedBy(baseService.getCurrentId());
         user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         userRepository.save(user);
-
-        return null;
+        return SUCCESS_RESPONSE("Update status successful", null);
     }
 
     public ServiceResponse changePass(ChangePassDTO input) {
@@ -148,8 +165,13 @@ public class UserService {
         return SUCCESS_RESPONSE("SUCCESS", null);
     }
 
-    public ServiceResponse getUserInfoByToken() {
-        User user = userRepository.getById(baseService.getCurrentId());
+    public ServiceResponse getUserInfoByToken(Long userId) {
+        Long id = userId == null ? baseService.getCurrentId() : userId;
+        User user = userRepository.findById(userId)
+                .orElse(null);
+        if (user == null) {
+            return NOT_FOUND_RESPONSE("Not found user by id = "+id,null);
+        }
         UserDTO userDTO = UserDTO.builder()
                 .userId(user.getId())
                 .username(user.getUsername())

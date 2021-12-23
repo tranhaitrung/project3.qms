@@ -60,5 +60,14 @@ public class ServiceResponse {
         return serviceResponse;
     }
 
+    public static ServiceResponse NOT_FOUND_RESPONSE(String message, Object data) {
+        ServiceResponse serviceResponse = new ServiceResponse();
+        serviceResponse.setStatus("NOT FOUND");
+        serviceResponse.setStatusCode(HttpStatus.SC_NOT_FOUND);
+        serviceResponse.setMessage(message);
+        serviceResponse.setData(data);
+        return serviceResponse;
+    }
+
 
 }
