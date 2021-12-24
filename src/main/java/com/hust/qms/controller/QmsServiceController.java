@@ -17,26 +17,32 @@ public class QmsServiceController {
     private QmsService qmsService;
 
     @PostMapping("/create")
-    public ResponseEntity createService(@RequestBody ServiceQMS serviceQMS) {
+    public ResponseEntity<?> createService(@RequestBody ServiceQMS serviceQMS) {
         ServiceResponse response = qmsService.createService(serviceQMS);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
     @GetMapping("/get-list")
-    public ResponseEntity getListService () {
+    public ResponseEntity<?> getListService () {
         ServiceResponse response = qmsService.getListService();
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
     @PutMapping("/update")
-    public ResponseEntity updateService(@RequestBody ServiceQMS serviceQMS) {
+    public ResponseEntity<?> updateService(@RequestBody ServiceQMS serviceQMS) {
         ServiceResponse response = qmsService.updateService(serviceQMS);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
     @PutMapping("/update-status")
-    public ResponseEntity setStatusService(@RequestBody ServiceQMS serviceQMS) {
+    public ResponseEntity<?> setStatusService(@RequestBody ServiceQMS serviceQMS) {
         ServiceResponse response = qmsService.setStatusService(serviceQMS);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @GetMapping("/list-both-score")
+    public ResponseEntity<?> listBothScore(){
+        ServiceResponse response = qmsService.listServiceBothScore();
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
