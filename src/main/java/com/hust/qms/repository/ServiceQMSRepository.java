@@ -8,12 +8,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ServiceQMSRepository extends JpaRepository<ServiceQMS, Long> {
     ServiceQMS findByServiceCodeAndStatus(String code, String status);
 
-    ServiceQMS findServiceQMSByServiceCode(String code);
+    Optional<ServiceQMS> findServiceQMSByServiceCode(String code);
 
     ServiceQMS findServiceQMSById(Long id);
 

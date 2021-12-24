@@ -24,4 +24,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     @Query(value = "SELECT * FROM feedback WHERE score != 0 and (:search is null or LOCATE(:search, CONCAT_WS(', ', member_fullname, service_name))) and (:score is null or score = :score) ", nativeQuery = true)
     Page<Feedback> listFeedback(String search, Integer score, Pageable pageable);
+
+    @Query(value = "select count(id) as totalScore, score from feedback where service_id = :serviceId and score is not null and score != 0 group by score", nativeQuery = true)
+    List<Map<String,Object>> statisticScoreService(Long serviceId);
 }
