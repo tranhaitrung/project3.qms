@@ -180,6 +180,7 @@ public class UserService {
                 .lastName(user.getLastName())
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
+                .country(user.getCountry())
                 .avatar(user.getAvatar())
                 .birthday(user.getBirthday())
                 .address(user.getAddress())

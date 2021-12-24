@@ -1,5 +1,6 @@
 package com.hust.qms.controller;
 
+import com.hust.qms.dto.UserDTO;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,12 @@ public class MemberController {
                                           @RequestParam(defaultValue = "1") Integer pageNo,
                                           @RequestParam(defaultValue = "10") Integer pageSize) {
         ServiceResponse response = memberService.listMember(search, status, fromDate, toDate, pageNo, pageSize);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @PostMapping("/update-information")
+    public ResponseEntity<?> updateInfoMember(@RequestBody UserDTO userDTO) {
+        ServiceResponse response = memberService.updateInfoMember(userDTO);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 }
