@@ -244,6 +244,8 @@ public class AuthenService {
                 .countryCode(input.getCountryCode())
                 .country(input.getCountry())
                 .birthday(input.getBirthday())
+                .verify_email(1)
+                .verify_phone(1)
                 .avatar("https://res.cloudinary.com/litchitech/image/upload/v1638332250/PROJECT3/avatardefault_odgzm2.jpg")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .build();
@@ -267,6 +269,7 @@ public class AuthenService {
                 .username(success.getUsername())
                 .email(success.getEmail())
                 .phone(success.getPhone())
+                .fullName(success.getFullName())
                 .build();
         generateVerifyCode(userDTO);
 
@@ -296,7 +299,7 @@ public class AuthenService {
 
         emailService.sendSimpleMessage(userDTO.getEmail(), "Tạo thành khoản thành công", content);
 
-        return SUCCESS_RESPONSE("Tạo tài khoản nhân viên thành công!", success);
+        return SUCCESS_RESPONSE("Tạo tài khoản nhân viên thành công!", userDTO);
     }
 
     public ServiceResponse sendCode(UserDTO userDTO) {
