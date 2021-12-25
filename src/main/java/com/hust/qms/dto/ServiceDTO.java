@@ -40,6 +40,6 @@ public class ServiceDTO {
 
     private Float scoreAverage;
 
-    private Map<Integer,Integer> score;
+    private Map<String,Integer> score;
 
 }

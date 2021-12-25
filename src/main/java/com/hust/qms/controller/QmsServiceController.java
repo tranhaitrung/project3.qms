@@ -1,5 +1,6 @@
 package com.hust.qms.controller;
 
+import com.hust.qms.dto.ServiceDTO;
 import com.hust.qms.entity.ServiceQMS;
 import com.hust.qms.exception.ServiceResponse;
 import com.hust.qms.service.QmsService;
@@ -29,7 +30,7 @@ public class QmsServiceController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateService(@RequestBody ServiceQMS serviceQMS) {
+    public ResponseEntity<?> updateService(@RequestBody ServiceDTO serviceQMS) {
         ServiceResponse response = qmsService.updateService(serviceQMS);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
@@ -43,6 +44,12 @@ public class QmsServiceController {
     @GetMapping("/list-both-score")
     public ResponseEntity<?> listBothScore(){
         ServiceResponse response = qmsService.listServiceBothScore();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteService(@RequestBody ServiceDTO serviceDTO){
+        ServiceResponse response = qmsService.removeService(serviceDTO.getServiceId());
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 

@@ -4,6 +4,7 @@ import com.hust.qms.entity.UserServiceQMS;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,6 +27,7 @@ public interface UserServiceQMSRepository extends JpaRepository<UserServiceQMS, 
 
     @Query(value = "UPDATE user_services SET service_name = :serviceName, service_code = :code WHERE service_id = :id", nativeQuery = true)
     @Transactional
+    @Modifying
     Integer updateServiceQms(@Param("serviceName") String serviceName, @Param("code") String code, @Param("id") Long id);
 
     @Query(value = "SELECT * FROM user_services WHERE customer_id = :userId and created_at >= :today", nativeQuery = true)

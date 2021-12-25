@@ -167,7 +167,7 @@ public class UserService {
 
     public ServiceResponse getUserInfoByToken(Long userId) {
         Long id = userId == null ? baseService.getCurrentId() : userId;
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(id)
                 .orElse(null);
         if (user == null) {
             return NOT_FOUND_RESPONSE("Not found user by id = "+id,null);

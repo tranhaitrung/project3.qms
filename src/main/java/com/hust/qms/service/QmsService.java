@@ -70,11 +70,13 @@ public class QmsService {
     }
 
     @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,MANAGER')")
-    public ServiceResponse updateService (ServiceQMS input) {
-        ServiceQMS serviceQMS = serviceQMSRepository.findServiceQMSById(input.getId());
+    public ServiceResponse updateService (ServiceDTO input) {
+        ServiceQMS serviceQMS = serviceQMSRepository.findServiceQMSById(input.getServiceId());
 
         serviceQMS.setServiceName(input.getServiceName());
         serviceQMS.setServiceCode(input.getServiceCode());
+        serviceQMS.setImage(input.getImage());
+        serviceQMS.setPrice(input.getPrice());
         serviceQMS.setStatus(input.getStatus());
         serviceQMS.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         serviceQMS.setUpdatedBy(baseService.getCurrentId());
@@ -109,7 +111,7 @@ public class QmsService {
             List<Map<String, Object>> listScore = feedbackRepository.statisticScoreService(s.getId());
             int totalScore = 0;
             int totalFeedback = 0;
-            Map<Integer, Integer> map = new HashMap<>();
+            Map<String, Integer> map = new HashMap<>();
             ServiceDTO serviceDTO = ServiceDTO.builder()
                     .serviceId(s.getId())
                     .serviceCode(s.getServiceCode())
@@ -129,12 +131,12 @@ public class QmsService {
                     if (Integer.parseInt(m.get("score").toString()) == i) {
                         check = 1;
                         Integer total = Integer.parseInt(m.get("totalScore").toString());
-                        map.put(i,total);
+                        map.put("score"+i,total);
                         totalScore = totalScore + total *i;
                         totalFeedback = totalFeedback + total;
                     }
                 }
-                if (check == 0) map.put(i, 0);
+                if (check == 0) map.put("score"+i, 0);
             }
             float avg = (float)totalScore/totalFeedback;
             serviceDTO.setScore(map);
