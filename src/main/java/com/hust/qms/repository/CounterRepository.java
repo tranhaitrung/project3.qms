@@ -2,6 +2,7 @@ package com.hust.qms.repository;
 
 import com.hust.qms.entity.Counter;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -19,6 +20,7 @@ public interface CounterRepository extends JpaRepository<Counter, Integer> {
 
     @Query(value = "UPDATE counters SET service_name = :serviceName WHERE service_id = :serviceId", nativeQuery = true)
     @Transactional
+    @Modifying
     Integer updateServiceName(@Param("serviceName") String serviceName, @Param("serviceId") Long serviceId);
 
     List<Counter> findAllByStatusAndAndServiceId(String status, Long serviceId);
