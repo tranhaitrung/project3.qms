@@ -1,4 +1,4 @@
-package com.hust.qms.response;
+package com.hust.qms.exception;
 
 public class MessageResponse {
     private String message;
