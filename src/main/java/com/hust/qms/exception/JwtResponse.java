@@ -1,4 +1,4 @@
-package com.hust.qms.response;
+package com.hust.qms.exception;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
