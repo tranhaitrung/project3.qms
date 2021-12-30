@@ -94,7 +94,19 @@ public class TakeNumberService {
                     .number(String.format("%06d", no))
                     .build();
 
-            userServiceQMSRepository.save(userServiceQMS);
+            UserServiceQMS u = userServiceQMSRepository.save(userServiceQMS);
+            Feedback feedback = Feedback.builder()
+                    .serviceName(userServiceQMS.getServiceName())
+                    .serviceId(userServiceQMS.getServiceId())
+                    .ticketId(u.getId())
+                    .customerFullname(user.getFullName())
+                    .customerId(userId)
+                    .memberId(u.getMemberId())
+                    .memberFullname(u.getFullNameMember())
+                    .counterId(u.getCounterId())
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .build();
+            feedbackRepository.save(feedback);
             return SUCCESS_RESPONSE("Số thứ tự của bạn là : " + String.format("%06d", no), userServiceQMS);
         }
 

@@ -67,10 +67,10 @@ public class CallNumberService {
 
         if (counter == null) return BAD_RESPONSE("Quầy không tồn tại");
 
-        String currentNumer = counter.getOrderNumber();
+        String currentNumber = counter.getOrderNumber();
         //Done khách hàng hiện tại
-        if (!StringUtils.isBlank(currentNumer)) {
-            UserServiceQMS userServiceQMS = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(currentNumer, ACTIVE, counterId);
+        if (!StringUtils.isBlank(currentNumber)) {
+            UserServiceQMS userServiceQMS = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(currentNumber, ACTIVE, counterId);
             userServiceQMS.setStatus(DONE);
             userServiceQMS.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             userServiceQMSRepository.save(userServiceQMS);
