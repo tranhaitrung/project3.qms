@@ -79,12 +79,13 @@ public class UserService {
         user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
         user.setUpdatedBy(userId);
         user.setPhone(userDTO.getPhone());
-        userDTO.setAvatar(user.getAvatar());
+        user.setAvatar(userDTO.getAvatar());
         user.setDisplayName(String.format("%s %s", userDTO.getFirstName(), userDTO.getLastName()));
 
         if (roles.contains(CUSTOMER)) {
             Customer customer = customerRepository.findCustomerByUsername(user.getUsername());
             customer.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            customer.setAvatar(userDTO.getAvatar());
             customer.setCity(user.getCity());
             customer.setDistrict(user.getDistrict());
             customer.setFirstName(user.getFirstName());
@@ -102,6 +103,7 @@ public class UserService {
         if (roles.contains(MANAGER) || roles.contains(EMPLOYEE)) {
             Member member = memberRepository.findMemberByUserId(user.getId());
             member.setCity(user.getCity());
+            member.setAvatar(userDTO.getAvatar());
             member.setDistrict(user.getDistrict());
             member.setFirstName(user.getFirstName());
             member.setLastName(user.getLastName());

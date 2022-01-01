@@ -30,7 +30,7 @@ public interface UserServiceQMSRepository extends JpaRepository<UserServiceQMS, 
     @Modifying
     Integer updateServiceQms(@Param("serviceName") String serviceName, @Param("code") String code, @Param("id") Long id);
 
-    @Query(value = "SELECT * FROM user_services WHERE customer_id = :userId and created_at >= :today", nativeQuery = true)
+    @Query(value = "SELECT * FROM user_services WHERE customer_id = :userId and created_at >= :today order by created_at desc", nativeQuery = true)
     List<UserServiceQMS> getUserServiceQMSByCustomerId(@Param("userId") Long userId, @Param("today") String today);
 
     @Query(value = "SELECT * FROM user_services WHERE customer_id = :userId and created_at >= :today and status != :status", nativeQuery = true)

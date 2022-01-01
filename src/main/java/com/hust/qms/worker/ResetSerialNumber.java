@@ -21,8 +21,7 @@ public class ResetSerialNumber {
     @Autowired
     private CounterRepository counterRepository;
 
-    //@Scheduled(cron = "0 0 0 * * *") //00:00:00 load lại dữ liệu
-    //@Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "0 0 0 * * *") //00:00:00 load lại dữ liệu
     protected void resetDataSerialNumber() {
         orderNumberRepository.deleteAll();
         log.info("reset table order number");

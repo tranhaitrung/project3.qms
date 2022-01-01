@@ -64,8 +64,9 @@ public class QmsService {
     }
 
 
-    public ServiceResponse getListService() {
-        List<ServiceQMS> list = serviceQMSRepository.findAll();
+    public ServiceResponse getListService(String status) {
+        if (StringUtils.isBlank(status)) status = null;
+        List<ServiceQMS> list = serviceQMSRepository.listServiceByStatus(status);
         return SUCCESS_RESPONSE("", list);
     }
 
@@ -93,7 +94,9 @@ public class QmsService {
 
     @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,MANAGER')")
     public ServiceResponse removeService(Long serviceId) {
-        userServiceQMSRepository.deleteById(serviceId);
+        ServiceQMS qmsService = serviceQMSRepository.findById(serviceId).orElse(null);
+        if (qmsService == null) return BAD_RESPONSE("NOT FOUND SERVICE!");
+        serviceQMSRepository.delete(qmsService);
         return SUCCESS_RESPONSE("Xóa dịch vụ thành công", null);
     }
 

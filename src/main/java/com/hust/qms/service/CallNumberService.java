@@ -4,6 +4,7 @@ import com.hust.qms.dto.CounterDTO;
 
 import com.hust.qms.entity.*;
 import com.hust.qms.exception.ServiceResponse;
+import com.hust.qms.mail.EmailService;
 import com.hust.qms.repository.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,12 @@ public class CallNumberService {
     @Autowired
     private ServiceQMSRepository serviceQMSRepository;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,EMPLOYEE,MANAGER')")
     public ServiceResponse activeCounter(Integer counterId, String serviceCode) {
         Counter counter = counterRepository.findCounterById(counterId);
@@ -67,10 +74,10 @@ public class CallNumberService {
 
         if (counter == null) return BAD_RESPONSE("Quầy không tồn tại");
 
-        String currentNumer = counter.getOrderNumber();
+        String currentNumber = counter.getOrderNumber();
         //Done khách hàng hiện tại
-        if (!StringUtils.isBlank(currentNumer)) {
-            UserServiceQMS userServiceQMS = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(currentNumer, ACTIVE, counterId);
+        if (!StringUtils.isBlank(currentNumber)) {
+            UserServiceQMS userServiceQMS = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(currentNumber, ACTIVE, counterId);
             userServiceQMS.setStatus(DONE);
             userServiceQMS.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             userServiceQMSRepository.save(userServiceQMS);
@@ -129,6 +136,9 @@ public class CallNumberService {
         counterDTO.setWaitingCustomerList(waitingCustomerList);
 
         String message = StringUtils.isBlank(counter.getOrderNumber()) ? "Đã hết khách hàng đợi!" : "Khách hàng tiếp theo là: " +counter.getOrderNumber();
+
+        User user = userRepository.findById(userServiceQMS.getCustomerId()).orElse(null);
+        emailService.sendSimpleMessage(user.getEmail(), "ĐẶT NHỠ SỐ", "Số của bạn đã được đặt vào danh sách số nhỡ do khi gọi tới bạn không có mặt");
 
         return SUCCESS_RESPONSE(message, counterDTO);
     }
@@ -246,6 +256,16 @@ public class CallNumberService {
             listCustomer.add(user);
         }
         return listCustomer;
+    }
+
+    public ServiceResponse callBack(Integer counterId) {
+        Counter counter = counterRepository.findCounterById(counterId);
+        Long userId = counter.getCustomerId();
+        if (userId == null) return BAD_RESPONSE("No customer is active");
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) return BAD_RESPONSE("No customer is activce");
+        emailService.sendSimpleMessage(user.getEmail(), "GỌI LẠI SỐ", "Số của bạn đã tới lượt, Vui lòng di chuyển tới "+ counter.getName());
+        return SUCCESS_RESPONSE("Success", null);
     }
 
 

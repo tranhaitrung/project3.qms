@@ -24,8 +24,8 @@ public class QmsServiceController {
     }
 
     @GetMapping("/get-list")
-    public ResponseEntity<?> getListService () {
-        ServiceResponse response = qmsService.getListService();
+    public ResponseEntity<?> getListService (@RequestParam(required = false) String status) {
+        ServiceResponse response = qmsService.getListService(status);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 

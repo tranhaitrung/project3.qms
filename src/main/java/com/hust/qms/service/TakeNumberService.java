@@ -60,9 +60,9 @@ public class TakeNumberService {
         String today = simpleDateFormat.format(new Timestamp(System.currentTimeMillis()));
         List<UserServiceQMS> userServiceQMSList = userServiceQMSRepository.getUserServiceQMSByCustomerIdAndNotStatus(userId, today, DONE);
 
-//        if (userServiceQMSList.size() > 0 ) {
-//            return BAD_RESPONSE("Số của bạn đang được xử lý!");
-//        }
+        if (userServiceQMSList.size() > 0 ) {
+            return BAD_RESPONSE("Số của bạn đang được xử lý!");
+        }
         OrderNumber orderNumber = orderNumberRepository.getLastOrderNumber();
 
         long no = orderNumber == null ? 1 : orderNumber.getNumber()+1;
@@ -94,7 +94,19 @@ public class TakeNumberService {
                     .number(String.format("%06d", no))
                     .build();
 
-            userServiceQMSRepository.save(userServiceQMS);
+            UserServiceQMS u = userServiceQMSRepository.save(userServiceQMS);
+            Feedback feedback = Feedback.builder()
+                    .serviceName(userServiceQMS.getServiceName())
+                    .serviceId(userServiceQMS.getServiceId())
+                    .ticketId(u.getId())
+                    .customerFullname(user.getFullName())
+                    .customerId(userId)
+                    .memberId(u.getMemberId())
+                    .memberFullname(u.getFullNameMember())
+                    .counterId(u.getCounterId())
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .build();
+            feedbackRepository.save(feedback);
             return SUCCESS_RESPONSE("Số thứ tự của bạn là : " + String.format("%06d", no), userServiceQMS);
         }
 

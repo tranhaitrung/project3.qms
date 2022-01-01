@@ -22,4 +22,6 @@ public interface ServiceQMSRepository extends JpaRepository<ServiceQMS, Long> {
     @Query(value = "UPDATE services SET status = :status, updated_at = now(), updated_by = :updatedBy where id = :id", nativeQuery = true)
     int updateStatusService(@Param("status") String status, @Param("updatedBy") Long userId, @Param("id") Long id);
 
+    @Query(value = "SELECT * FROM services where :status is null or status = :status", nativeQuery = true)
+    List<ServiceQMS> listServiceByStatus(String status);
 }
