@@ -44,4 +44,10 @@ public class CallNumberController {
         ServiceResponse response = callNumberService.changeCounter(number, counterIdFrom, counterIdTo);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
+
+    @GetMapping("/call-back-number")
+    public ResponseEntity<?> callbackNumber(@RequestParam Integer counterId) {
+        ServiceResponse response = callNumberService.callBack(counterId);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
 }
