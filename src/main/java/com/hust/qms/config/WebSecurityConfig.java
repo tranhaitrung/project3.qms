@@ -74,7 +74,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/v1/counter/get-all",
                         "/api/v1/service/get-list",
                         "/api/v1/user/active-account/**",
-                        "/api/v1/user/validate")
+                        "/api/v1/user/validate",
+                        "/api/v1/up-file-free")
                 .permitAll()
                 .anyRequest()
                 .authenticated();

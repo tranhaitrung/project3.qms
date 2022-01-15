@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1")
 @CrossOrigin(value = "*", maxAge = 3600)
@@ -24,5 +26,16 @@ public class UploadController {
 //        upLoadFileDTO.setFile(file);
         ServiceResponse response = upLoadService.uploadImage(upLoadFileDTO);
         return new ResponseEntity(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @PostMapping(value = "/up-file-free")
+    public Object upImageFree(@RequestParam("upload") MultipartFile upload) {
+//        UpLoadFileDTO upLoadFileDTO = new UpLoadFileDTO();
+//        upLoadFileDTO.setFile(file);
+//        System.out.println(upLoadFileDTO.toString());
+        System.out.println(upload);
+        Object response = upLoadService.uploadImageFree(upload);
+        //return new ResponseEntity(response, HttpStatus.valueOf(response.getStatusCode()));
+        return response;
     }
 }
