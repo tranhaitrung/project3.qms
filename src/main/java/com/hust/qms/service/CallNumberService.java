@@ -150,7 +150,7 @@ public class CallNumberService {
      * @param counterIdFrom id quầy gốc
      * @return
      */
-    @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,EMPOYEE,MANAGER')")
+    @PreAuthorize("@checkRolesService.authorizeRole('ADMIN,EMPLOYEE,MANAGER')")
     public ServiceResponse changeCounter(String number, Integer counterIdFrom, Integer counterIdTo) {
         UserServiceQMS userServiceQMS = userServiceQMSRepository.findUserServiceByNumberLastAndStatus(number, ACTIVE, counterIdFrom);
 
